@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.vidalia</groupId>
-	<artifactId>volunteering-board</artifactId>
+	<artifactId>project-vidalia-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>volunteering-board</name>
-	<description>Backend for the VolunteeringBoard project by Team Vidalia</description>
+	<name>project-vidalia-backend</name>
+	<description>Backend for the DoGoodr project by Team Vidalia</description>
 	<url/>
 	<licenses>
 		<license/>
