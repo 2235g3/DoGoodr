@@ -1,10 +1,10 @@
-package com.vidalia.volunteeringboard;
+package com.vidalia.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class VolunteeringBoardApplicationTests {
+class ProjectVidaliaApplicationTests {
 
 	@Test
 	void contextLoads() {
