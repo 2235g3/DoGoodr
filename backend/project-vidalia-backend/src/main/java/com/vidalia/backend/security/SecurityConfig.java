@@ -54,7 +54,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-    
     //TO DO: implement authentication manager
 
     @Bean
