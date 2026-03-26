@@ -37,7 +37,7 @@ public class AuthenticationService {
                         request.getPassword())
         );
         User user = userRepository.findUserByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + request.getEmail()));
+                .orElseThrow(() -> new AuthenticationServiceException("Authenticated user could not be loaded"));
 
         setLastLogin(user);
 
@@ -50,15 +50,24 @@ public class AuthenticationService {
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request) {
         String refreshToken = request.getRefreshToken();
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
 
-        String email = jwtService.extractEmail(refreshToken);
+        String email;
+        try {
+            email = jwtService.extractEmail(refreshToken);
+        } catch (RuntimeException exception) {
+            throw new BadCredentialsException("Invalid refresh token", exception);
+        }
+
         if (email == null || email.isBlank()) {
             throw new BadCredentialsException("Invalid refresh token");
         }
 
         User user = userRepository.findUserByEmail(email)
-                .orElseThrow(() -> new AuthenticationServiceException("User not found with email: " + email));
-        
+                .orElseThrow(() -> new BadCredentialsException("Invalid refresh token"));
+
         if (!jwtService.isRefreshTokenValid(refreshToken, user)) {
             throw new BadCredentialsException("Invalid refresh token");
         }
@@ -77,7 +86,7 @@ public class AuthenticationService {
         UserResponseDTO savedUserDTO = userService.createUser(createUserDTO);
 
         User savedUser = userRepository.findUserByEmail(savedUserDTO.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found after creation"));
+                .orElseThrow(() -> new AuthenticationServiceException("Created user could not be loaded"));
 
         setLastLogin(savedUser);
 
