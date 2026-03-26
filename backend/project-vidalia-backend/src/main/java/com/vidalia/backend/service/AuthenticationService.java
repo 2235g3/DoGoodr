@@ -2,6 +2,7 @@ package com.vidalia.backend.service;
 
 import com.vidalia.backend.dto.auth.AuthResponse;
 import com.vidalia.backend.dto.auth.LoginRequest;
+import com.vidalia.backend.dto.auth.RefreshTokenRequest;
 import com.vidalia.backend.dto.auth.RegisterRequest;
 import com.vidalia.backend.dto.user.CreateUserDTO;
 import com.vidalia.backend.dto.user.UserResponseDTO;
@@ -12,6 +13,8 @@ import com.vidalia.backend.repository.UserRepository;
 import com.vidalia.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +45,29 @@ public class AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return new AuthResponse(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public AuthResponse refresh(RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        String email = jwtService.extractEmail(refreshToken);
+        if (email == null || email.isBlank()) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        User user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new AuthenticationServiceException("User not found with email: " + email));
+        
+        if (!jwtService.isRefreshTokenValid(refreshToken, user)) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        //Rotate tokens
+        String newAccessToken = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        return new AuthResponse(newAccessToken, newRefreshToken);
     }
 
     @Transactional
