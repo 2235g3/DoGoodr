@@ -51,20 +51,17 @@ public class UserAdminController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(createUserDTO));
     }
 
-    //Add user authentication
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
         return ResponseEntity.ok(userService.updateUser(id, updateUserDTO));
     }
 
-    //Add user authentication
     @PutMapping("/password/{id}")
     public ResponseEntity<Void> updatePassword(@PathVariable UUID id, @Valid @RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
         userService.updateUserPassword(id, updateUserPasswordDTO);
         return ResponseEntity.ok().build();
     }
 
-    //Add user authentication
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);

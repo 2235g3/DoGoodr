@@ -32,7 +32,6 @@ public class UserController {
 
     }
 
-    //Add user authentication
     @PutMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<UserResponseDTO> updateUser(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
@@ -40,7 +39,6 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userId, updateUserDTO));
     }
 
-    //Add user authentication
     @PutMapping("/me/password")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
@@ -49,7 +47,6 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    //Add user authentication
     @DeleteMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
