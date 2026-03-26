@@ -31,7 +31,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-
+    @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
@@ -43,6 +43,7 @@ public class UserService {
      * @param role the role to filter users by
      * @return List of users with role
      */
+    @Transactional(readOnly = true)
     public List<UserResponseDTO> getUsersByRole(Role role) {
         return userRepository.findAllByRole(role).stream()
                 .map(userMapper::toDTO)
@@ -50,6 +51,7 @@ public class UserService {
 
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserById(UUID id) {
         return userRepository.findById(id)
                 .map(userMapper::toDTO)
@@ -57,13 +59,14 @@ public class UserService {
 
     }
 
+    @Transactional(readOnly = true)
     public UserResponseDTO getUserByEmail(String email) {
         return userRepository.findUserByEmail(email)
                 .map(userMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
-
+    @Transactional
     public UserResponseDTO createUser(CreateUserDTO createUserDTO) {
         //Check that the email is unique/ not already registered
         if (userRepository.existsByEmailIgnoreCase(createUserDTO.getEmail())) {
@@ -92,6 +95,7 @@ public class UserService {
      * @param dto Details to update
      * @return Updated user details
      */
+    @Transactional
     public UserResponseDTO updateUser(UUID id, @Valid UpdateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -124,6 +128,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public void updateUserPassword(UUID id, @Valid UpdateUserPasswordDTO dto) {
         User user =  userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -138,6 +143,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));

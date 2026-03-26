@@ -1,8 +1,10 @@
 package com.vidalia.backend.mapper;
 
+import com.vidalia.backend.dto.auth.RegisterRequest;
 import com.vidalia.backend.dto.user.CreateUserDTO;
 import com.vidalia.backend.dto.user.UpdateUserDTO;
 import com.vidalia.backend.dto.user.UserResponseDTO;
+import com.vidalia.backend.model.Role;
 import com.vidalia.backend.model.User;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +41,14 @@ public class UserMapper {
         if (dto.getPhoneNumber() != null) {
             user.setPhoneNumber(dto.getPhoneNumber());
         }
+    }
+
+    public CreateUserDTO fromRegisterRequest(RegisterRequest request, Role role) {
+        CreateUserDTO dto = new CreateUserDTO();
+        dto.setEmail(request.getEmail());
+        dto.setPassword(request.getPassword());
+        dto.setRole(role);
+        return dto;
     }
 
 
