@@ -3,11 +3,13 @@ package com.vidalia.backend.controller;
 import com.vidalia.backend.dto.user.UpdateUserDTO;
 import com.vidalia.backend.dto.user.UpdateUserPasswordDTO;
 import com.vidalia.backend.dto.user.UserResponseDTO;
+import com.vidalia.backend.security.CustomUserDetails;
 import com.vidalia.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -23,31 +25,36 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDTO> getUser(@PathVariable UUID id) {
-        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    public ResponseEntity<UserResponseDTO> getUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        UUID userId = userDetails.getId();
+        return new ResponseEntity<>(userService.getUserById(userId), HttpStatus.OK);
 
     }
 
     //Add user authentication
     @PutMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
-        return ResponseEntity.ok(userService.updateUser(id, updateUserDTO));
+    public ResponseEntity<UserResponseDTO> updateUser(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(userService.updateUser(userId, updateUserDTO));
     }
 
     //Add user authentication
     @PutMapping("/me/password")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
-    public ResponseEntity<Void> updatePassword(@PathVariable UUID id, @Valid @RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
-        userService.updateUserPassword(id, updateUserPasswordDTO);
+    public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
+        UUID userId = userDetails.getId();
+        userService.updateUserPassword(userId, updateUserPasswordDTO);
         return ResponseEntity.ok().build();
     }
 
     //Add user authentication
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID userId = userDetails.getId();
+        userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 }
