@@ -50,7 +50,7 @@ public class UserController {
     }
 
     //Add user authentication
-    @DeleteMapping("/delete")
+    @DeleteMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
