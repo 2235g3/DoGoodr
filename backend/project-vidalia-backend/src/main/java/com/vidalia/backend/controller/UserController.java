@@ -16,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/user")
+@PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")  // All endpoints require at least one of these roles
 public class UserController {
 
     private final UserService userService;
@@ -33,14 +34,12 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<UserResponseDTO> updateUser(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserDTO updateUserDTO) {
         UUID userId = userDetails.getId();
         return ResponseEntity.ok(userService.updateUser(userId, updateUserDTO));
     }
 
     @PutMapping("/me/password")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<Void> updatePassword(@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserPasswordDTO updateUserPasswordDTO) {
         UUID userId = userDetails.getId();
         userService.updateUserPassword(userId, updateUserPasswordDTO);
@@ -48,7 +47,6 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
         userService.deleteUser(userId);
