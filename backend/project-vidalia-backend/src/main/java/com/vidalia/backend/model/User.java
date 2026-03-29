@@ -30,7 +30,7 @@ public class User {
     @NotNull(message = "Email cannot be null")
     @NotBlank(message = "Email cannot be blank")
     @Email
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 254)
     private String email;
 
     @NotNull(message = "Password cannot be null")

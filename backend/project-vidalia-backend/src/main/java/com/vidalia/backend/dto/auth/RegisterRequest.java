@@ -10,7 +10,7 @@ public class RegisterRequest {
     @NotBlank(message = "Email is required")
     @Schema(description = "User's email address", example = "examplemail@mail.com")
     @Email(message = "Email should be valid")
-    @Size(min = 3, max = 50, message = "Email must be between 3 and 50 characters")
+    @Size(min = 3, max = 254, message = "Email must be between 3 and 254 characters long")
     protected String email;
 
     @NotBlank(message = "Password is required")
