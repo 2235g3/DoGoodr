@@ -35,7 +35,7 @@ public class User {
 
     @NotNull(message = "Password cannot be null")
     @NotBlank(message = "Password cannot be blank")
-    @Column(nullable = false, length = 255) // Password pattern validation is in DTOs
+    @Column(nullable = false, length = 254) // Password pattern validation is in DTOs
     private String password;
 
     @Column(length = 50)
