@@ -10,12 +10,12 @@ import lombok.Data;
 public class UpdateUserDTO {
     @Schema(description = "User's email address", example = "examplemail@mail.com")
     @Email(message = "Email should be valid")
-    @Size(min = 3, max = 50, message = "Email must be between 3 and 50 characters")
+    @Size(min = 3, max = 254, message = "Email must be between 3 and 50 characters")
     protected String email;
 
     @Schema(description = "User's email address", example = "examplemail@mail.com")
     @Email(message = "Email should be valid")
-    @Size(min = 3, max = 50, message = "Email must be between 3 and 50 characters")
+    @Size(min = 3, max = 254, message = "Email must be between 3 and 50 characters")
     protected String secondaryEmail;
 
     @Pattern(
