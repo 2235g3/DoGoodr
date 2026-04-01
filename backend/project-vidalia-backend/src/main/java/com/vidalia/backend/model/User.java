@@ -38,7 +38,7 @@ public class User {
     @Column(nullable = false, length = 254) // Password pattern validation is in DTOs
     private String password;
 
-    @Column(length = 50)
+    @Column(length = 254)
     @Email
     private String secondaryEmail;
 
