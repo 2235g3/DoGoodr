@@ -19,8 +19,8 @@ public class UpdateUserDTO {
     protected String secondaryEmail;
 
     @Pattern(
-            regexp = "^\\+?[0-9]{10,15}$",
-            message = "Phone number must be valid and contain 10-15 digits, optionally starting with +"
+            regexp = "^\\+[1-9]\\d{7,14}$",
+            message = "Phone number must be in E.164 format (e.g. +44123123456)"
     )
     protected String phoneNumber;
 }

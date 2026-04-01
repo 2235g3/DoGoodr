@@ -42,7 +42,7 @@ public class User {
     @Email
     private String secondaryEmail;
 
-    @Column(length = 17)
+    @Column(length = 16) //Phone number is stored with + sign
     private String phoneNumber;
 
     @Column(nullable = false)
