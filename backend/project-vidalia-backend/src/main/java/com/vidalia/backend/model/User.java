@@ -35,14 +35,14 @@ public class User {
 
     @NotNull(message = "Password cannot be null")
     @NotBlank(message = "Password cannot be blank")
-    @Column(nullable = false, length = 255) // Password validation is in CreateUser
+    @Column(nullable = false, length = 254) // Password pattern validation is in DTOs
     private String password;
 
     @Column(length = 254)
     @Email
     private String secondaryEmail;
 
-    @Column(length = 17)
+    @Column(length = 16) //Phone number is stored with + sign
     private String phoneNumber;
 
     @Column(nullable = false)
