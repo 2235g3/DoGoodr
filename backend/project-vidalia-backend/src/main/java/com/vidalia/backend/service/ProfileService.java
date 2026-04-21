@@ -11,8 +11,10 @@ import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.OrganisationProfileMapper;
 import com.vidalia.backend.mapper.VolunteerProfileMapper;
 import com.vidalia.backend.model.OrganisationProfile;
+import com.vidalia.backend.model.User;
 import com.vidalia.backend.model.VolunteerProfile;
 import com.vidalia.backend.repository.OrganisationProfileRepository;
+import com.vidalia.backend.repository.UserRepository;
 import com.vidalia.backend.repository.VolunteerProfileRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class ProfileService {
 
     private final VolunteerProfileRepository volunteerRepository;
     private final OrganisationProfileRepository organisationRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final VolunteerProfileMapper volunteerProfileMapper;
     private final OrganisationProfileMapper organisationProfileMapper;
 
@@ -49,7 +51,6 @@ public class ProfileService {
         return volunteerRepository.findById(id)
                 .map(volunteerProfileMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found with id: " + id));
-
     }
 
     @Transactional(readOnly = true)
@@ -61,14 +62,18 @@ public class ProfileService {
 
     @Transactional
     public VProfileResponseDTO createVolunteerProfile(CreateVolunteerProfileDTO dto, UUID userId) {
-        //Check if a profile (any type) already exists for this user
         if (volunteerRepository.existsByUserId(userId) || organisationRepository.existsByUserId(userId)) {
             throw new ResourceAlreadyExistsException("Profile already exists for this user");
         }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
         VolunteerProfile profile = volunteerProfileMapper.toEntity(dto);
+        profile.setUser(user);
         profile.setLastUpdated(LocalDateTime.now());
         profile.setPointsBalance(0);
+
         volunteerRepository.save(profile);
         return volunteerProfileMapper.toDTO(profile);
     }
@@ -88,7 +93,6 @@ public class ProfileService {
     public void deleteVolunteerProfile(UUID profileId) {
         VolunteerProfile profile = volunteerRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + profileId));
-        ;
         volunteerRepository.delete(profile);
     }
 
@@ -117,14 +121,18 @@ public class ProfileService {
 
     @Transactional
     public OProfileResponseDTO createOrganisationProfile(CreateOrganisationProfileDTO dto, UUID userId) {
-        // Check if a profile (any type) already exists for this user
         if (volunteerRepository.existsByUserId(userId) || organisationRepository.existsByUserId(userId)) {
             throw new ResourceAlreadyExistsException("Profile already exists for this user");
         }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
         OrganisationProfile profile = organisationProfileMapper.toEntity(dto);
+        profile.setUser(user);
         profile.setLastUpdated(LocalDateTime.now());
         profile.setVerified(false);
+
         organisationRepository.save(profile);
         return organisationProfileMapper.toDTO(profile);
     }
@@ -155,7 +163,6 @@ public class ProfileService {
     public void deleteOrganisationProfile(UUID profileId) {
         OrganisationProfile profile = organisationRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + profileId));
-        ;
         organisationRepository.delete(profile);
     }
 }

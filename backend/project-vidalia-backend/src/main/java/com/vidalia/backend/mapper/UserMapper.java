@@ -1,6 +1,7 @@
 package com.vidalia.backend.mapper;
 
-import com.vidalia.backend.dto.auth.RegisterRequest;
+import com.vidalia.backend.dto.auth.ORegisterRequest;
+import com.vidalia.backend.dto.auth.VRegisterRequest;
 import com.vidalia.backend.dto.user.CreateUserDTO;
 import com.vidalia.backend.dto.user.UpdateUserDTO;
 import com.vidalia.backend.dto.user.UserResponseDTO;
@@ -43,13 +44,19 @@ public class UserMapper {
         }
     }
 
-    public CreateUserDTO fromRegisterRequest(RegisterRequest request, Role role) {
+    public CreateUserDTO fromVolunteerRegisterRequest(VRegisterRequest request) {
         CreateUserDTO dto = new CreateUserDTO();
         dto.setEmail(request.getEmail());
         dto.setPassword(request.getPassword());
-        dto.setRole(role);
+        dto.setRole(Role.VOLUNTEER);
         return dto;
     }
 
-
+    public CreateUserDTO fromOrganisationRegisterRequest(ORegisterRequest request) {
+        CreateUserDTO dto = new CreateUserDTO();
+        dto.setEmail(request.getEmail());
+        dto.setPassword(request.getPassword());
+        dto.setRole(Role.ORGANISATION);
+        return dto;
+    }
 }

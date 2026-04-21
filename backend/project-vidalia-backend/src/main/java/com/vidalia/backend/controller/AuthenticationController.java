@@ -3,8 +3,8 @@ package com.vidalia.backend.controller;
 import com.vidalia.backend.dto.auth.AuthResponse;
 import com.vidalia.backend.dto.auth.LoginRequest;
 import com.vidalia.backend.dto.auth.RefreshTokenRequest;
-import com.vidalia.backend.dto.auth.RegisterRequest;
-import com.vidalia.backend.model.Role;
+import com.vidalia.backend.dto.auth.ORegisterRequest;
+import com.vidalia.backend.dto.auth.VRegisterRequest;
 import com.vidalia.backend.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,20 +34,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register/volunteer")
-    public ResponseEntity<AuthResponse> registerVolunteer(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authenticationService.registerUser(request, Role.VOLUNTEER);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+    public ResponseEntity<AuthResponse> registerVolunteer(@Valid @RequestBody VRegisterRequest request) {
+        AuthResponse response = authenticationService.registerVolunteer(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/register/organisation")
-    public ResponseEntity<AuthResponse> registerOrganisation(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authenticationService.registerUser(request, Role.ORGANISATION);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+    public ResponseEntity<AuthResponse> registerOrganisation(@Valid @RequestBody ORegisterRequest request) {
+        AuthResponse response = authenticationService.registerOrganisation(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
-
 }
