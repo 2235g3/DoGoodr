@@ -84,6 +84,14 @@ public class ProfileService {
         return volunteerProfileMapper.toDTO(volunteerProfile);
     }
 
+    @Transactional
+    public void deleteVolunteerProfile(UUID profileId) {
+        VolunteerProfile profile = volunteerRepository.findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + profileId));
+        ;
+        volunteerRepository.delete(profile);
+    }
+
     //=========Organisation Profile Methods ============
 
     @Transactional(readOnly = true)
@@ -141,5 +149,13 @@ public class ProfileService {
         organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
         return organisationProfileMapper.toDTO(organisationProfile);
+    }
+
+    @Transactional
+    public void deleteOrganisationProfile(UUID profileId) {
+        OrganisationProfile profile = organisationRepository.findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + profileId));
+        ;
+        organisationRepository.delete(profile);
     }
 }
