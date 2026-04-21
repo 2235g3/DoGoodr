@@ -149,9 +149,9 @@ public class ProfileService {
     }
 
     @Transactional
-    public OProfileResponseDTO verifyOrganisationProfile(UUID userId) {
-        OrganisationProfile organisationProfile = organisationRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found for user id: " + userId));
+    public OProfileResponseDTO verifyOrganisationProfile(UUID profileId) {
+        OrganisationProfile organisationProfile = organisationRepository.findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found with id: " + profileId));
 
         organisationProfile.setVerified(true);
         organisationProfile.setLastUpdated(LocalDateTime.now());

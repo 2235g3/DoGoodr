@@ -117,8 +117,7 @@ public class AuthenticationService {
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    @Transactional
-    protected void setLastLogin(User user) {
+    private void setLastLogin(User user) {
         user.setLastLogin(java.time.LocalDateTime.now());
         userRepository.save(user);
     }

@@ -14,12 +14,10 @@ public class UpdateVolunteerProfileDTO {
     private String surname;
     @Column(length = 100)
     private String preferredName;
-
     @Email
     @Column(length = 254)
     @Size(min = 3, max = 254, message = "Email must be between 3 and 254 characters")
     private String contactEmail;
-
     @Column(length = 255)
     private String location;
     @Column(length = 255)
