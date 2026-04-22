@@ -117,5 +117,41 @@ public class FileUploadService {
         }
         return urlPrefix + "/" + fileName;
     }
-}
 
+    public void deleteFile(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return;
+        }
+
+        try {
+            String fileName = extractFileNameFromUrl(fileUrl);
+            if (fileName == null || fileName.isBlank()) {
+                return;
+            }
+
+            Path filePath = Path.of(fileUploadProperties.getRootDir()).toAbsolutePath().normalize()
+                    .resolve(fileName).normalize();
+
+            if (!filePath.startsWith(Path.of(fileUploadProperties.getRootDir()).toAbsolutePath().normalize())) {
+                return;
+            }
+
+            Files.deleteIfExists(filePath);
+        } catch (IOException exception) {
+            // Log but don't throw - file deletion is non-critical
+        }
+    }
+
+    private String extractFileNameFromUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return null;
+        }
+
+        int lastSlash = fileUrl.lastIndexOf('/');
+        if (lastSlash < 0 || lastSlash == fileUrl.length() - 1) {
+            return null;
+        }
+
+        return fileUrl.substring(lastSlash + 1);
+    }
+}

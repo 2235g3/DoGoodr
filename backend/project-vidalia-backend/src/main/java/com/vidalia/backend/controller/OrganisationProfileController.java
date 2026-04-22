@@ -45,5 +45,11 @@ public class OrganisationProfileController {
         UUID userId = userDetails.getId();
         return ResponseEntity.ok(profileService.uploadOrganisationProfilePicture(userId, file));
     }
-}
 
+    @DeleteMapping("/me/profile-picture")
+    public ResponseEntity<OProfileResponseDTO> deleteMyOrganisationProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(profileService.deleteOrganisationProfilePicture(userId));
+    }
+}

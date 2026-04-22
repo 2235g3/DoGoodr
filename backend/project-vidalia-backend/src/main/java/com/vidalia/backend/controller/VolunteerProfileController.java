@@ -53,4 +53,18 @@ public class VolunteerProfileController {
         UUID userId = userDetails.getId();
         return ResponseEntity.ok(profileService.uploadVolunteerCV(userId, file));
     }
+
+    @DeleteMapping("/me/profile-picture")
+    public ResponseEntity<VProfileResponseDTO> deleteMyVolunteerProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(profileService.deleteVolunteerProfilePicture(userId));
+    }
+
+    @DeleteMapping("/me/cv")
+    public ResponseEntity<VProfileResponseDTO> deleteMyVolunteerCV(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(profileService.deleteVolunteerCV(userId));
+    }
 }
