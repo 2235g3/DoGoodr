@@ -10,7 +10,9 @@ import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.UserMapper;
 import com.vidalia.backend.model.Role;
 import com.vidalia.backend.model.User;
+import com.vidalia.backend.repository.OrganisationProfileRepository;
 import com.vidalia.backend.repository.UserRepository;
+import com.vidalia.backend.repository.VolunteerProfileRepository;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final VolunteerProfileRepository volunteerRepository;
+    private final OrganisationProfileRepository organisationRepository;
 
     @Transactional(readOnly = true)
     public List<UserResponseDTO> getAllUsers() {
@@ -147,6 +151,11 @@ public class UserService {
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        //Find and delete related profile
+        volunteerRepository.findByUserId(id).ifPresent(volunteerRepository::delete);
+        organisationRepository.findByUserId(id).ifPresent(organisationRepository::delete);
+
         userRepository.delete(user);
     }
 

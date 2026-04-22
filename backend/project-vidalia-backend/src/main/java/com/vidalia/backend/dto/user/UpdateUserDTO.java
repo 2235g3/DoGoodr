@@ -13,7 +13,7 @@ public class UpdateUserDTO {
     @Size(min = 3, max = 254, message = "Email must be between 3 and 254 characters")
     protected String email;
 
-    @Schema(description = "User's email address", example = "examplemail@mail.com")
+    @Schema(description = "User's secondary email address", example = "examplemail@mail.com")
     @Email(message = "Email should be valid")
     @Size(min = 3, max = 254, message = "Email must be between 3 and 254 characters")
     protected String secondaryEmail;
