@@ -29,6 +29,9 @@ public class OrganisationProfile {
     @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
 
+    @Column(name = "profile_picture_url", length = 500)
+    private String profilePictureUrl;
+
     @Column(name = "account_type", nullable = false)
     private AccountType accountType;
 

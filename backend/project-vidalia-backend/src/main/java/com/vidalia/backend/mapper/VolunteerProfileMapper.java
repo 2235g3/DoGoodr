@@ -32,6 +32,8 @@ public class VolunteerProfileMapper {
         responseDTO.setForename(profile.getForename());
         responseDTO.setSurname(profile.getSurname());
         responseDTO.setPreferredName(profile.getPreferredName());
+        responseDTO.setProfilePictureUrl(profile.getProfilePictureUrl());
+        responseDTO.setCvUrl(profile.getCvUrl());
         responseDTO.setContactEmail(profile.getContactEmail());
         responseDTO.setLocation(profile.getLocation());
         responseDTO.setProfileDescription(profile.getProfileDescription());

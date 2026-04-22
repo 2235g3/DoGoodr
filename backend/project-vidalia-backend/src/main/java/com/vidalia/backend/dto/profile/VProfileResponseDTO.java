@@ -12,6 +12,8 @@ public class VProfileResponseDTO {
     private String forename;
     private String surname;
     private String preferredName;
+    private String profilePictureUrl;
+    private String cvUrl;
     private String contactEmail;
     private String location;
     private String profileDescription;

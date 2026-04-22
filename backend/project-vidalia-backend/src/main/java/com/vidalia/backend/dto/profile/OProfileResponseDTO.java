@@ -7,6 +7,7 @@ import java.util.UUID;
 public class OProfileResponseDTO {
     private UUID id;
     private String displayName;
+    private String profilePictureUrl;
     private String description;
     private String contactEmail;
     private String location;

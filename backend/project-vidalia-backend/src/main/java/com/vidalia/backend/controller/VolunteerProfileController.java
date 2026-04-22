@@ -1,15 +1,15 @@
 package com.vidalia.backend.controller;
 
-import com.vidalia.backend.dto.profile.CreateVolunteerProfileDTO;
 import com.vidalia.backend.dto.profile.UpdateVolunteerProfileDTO;
 import com.vidalia.backend.dto.profile.VProfileResponseDTO;
 import com.vidalia.backend.security.CustomUserDetails;
 import com.vidalia.backend.service.ProfileService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -37,5 +37,20 @@ public class VolunteerProfileController {
         UUID userId = userDetails.getId();
         return ResponseEntity.ok(profileService.updateVolunteerProfile(updateDTO, userId));
     }
-}
 
+    @PutMapping(value = "/me/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<VProfileResponseDTO> uploadMyVolunteerProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("file") MultipartFile file) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(profileService.uploadVolunteerProfilePicture(userId, file));
+    }
+
+    @PutMapping(value = "/me/cv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<VProfileResponseDTO> uploadMyVolunteerCV(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("file") MultipartFile file) {
+        UUID userId = userDetails.getId();
+        return ResponseEntity.ok(profileService.uploadVolunteerCV(userId, file));
+    }
+}

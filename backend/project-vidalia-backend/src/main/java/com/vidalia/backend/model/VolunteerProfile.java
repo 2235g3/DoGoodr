@@ -36,6 +36,12 @@ public class VolunteerProfile {
     @Column(name = "preferred_name", nullable = false, length = 100)
     private String preferredName;
 
+    @Column(name = "profile_picture_url", length = 500)
+    private String profilePictureUrl;
+
+    @Column(name = "cv_url", length = 500)
+    private String cvUrl;
+
     @Email
     @Column(name = "contact_email", length = 254)
     private String contactEmail;

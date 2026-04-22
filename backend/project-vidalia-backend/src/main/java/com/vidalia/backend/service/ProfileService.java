@@ -1,5 +1,6 @@
 package com.vidalia.backend.service;
 
+import com.vidalia.backend.config.FileUploadProperties;
 import com.vidalia.backend.dto.profile.CreateOrganisationProfileDTO;
 import com.vidalia.backend.dto.profile.CreateVolunteerProfileDTO;
 import com.vidalia.backend.dto.profile.OProfileResponseDTO;
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +38,8 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final VolunteerProfileMapper volunteerProfileMapper;
     private final OrganisationProfileMapper organisationProfileMapper;
+    private final FileUploadService fileUploadService;
+    private final FileUploadProperties fileUploadProperties;
 
     //=========Volunteer Profile Methods ============
 
@@ -43,21 +47,26 @@ public class ProfileService {
     public List<VProfileResponseDTO> getAllVolunteerProfiles() {
         return volunteerRepository.findAll().stream()
                 .map(volunteerProfileMapper::toDTO)
+                .peek(this::applyDefaultProfilePicture)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public VProfileResponseDTO getVolunteerProfileById(UUID id) {
-        return volunteerRepository.findById(id)
+        VProfileResponseDTO responseDTO = volunteerRepository.findById(id)
                 .map(volunteerProfileMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found with id: " + id));
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional(readOnly = true)
     public VProfileResponseDTO getVolunteerProfileByUserId(UUID userId) {
-        return volunteerRepository.findByUserId(userId)
+        VProfileResponseDTO responseDTO = volunteerRepository.findByUserId(userId)
                 .map(volunteerProfileMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -75,7 +84,9 @@ public class ProfileService {
         profile.setPointsBalance(0);
 
         volunteerRepository.save(profile);
-        return volunteerProfileMapper.toDTO(profile);
+        VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(profile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -86,7 +97,39 @@ public class ProfileService {
         volunteerProfileMapper.updateEntity(volunteerProfile, updateDTO);
         volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
-        return volunteerProfileMapper.toDTO(volunteerProfile);
+        VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
+    }
+
+    @Transactional
+    public VProfileResponseDTO uploadVolunteerProfilePicture(UUID userId, MultipartFile file) {
+        VolunteerProfile volunteerProfile = volunteerRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));
+
+        String storedFileUrl = fileUploadService.uploadProfilePicture(file, userId);
+        volunteerProfile.setProfilePictureUrl(storedFileUrl);
+        volunteerProfile.setLastUpdated(LocalDateTime.now());
+        volunteerRepository.save(volunteerProfile);
+
+        VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
+    }
+
+    @Transactional
+    public VProfileResponseDTO uploadVolunteerCV(UUID userId, MultipartFile file) {
+        VolunteerProfile volunteerProfile = volunteerRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));
+
+        String storedFileUrl = fileUploadService.uploadCV(file, userId);
+        volunteerProfile.setCvUrl(storedFileUrl);
+        volunteerProfile.setLastUpdated(LocalDateTime.now());
+        volunteerRepository.save(volunteerProfile);
+
+        VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -102,21 +145,26 @@ public class ProfileService {
     public List<OProfileResponseDTO> getAllOrganisationProfiles() {
         return organisationRepository.findAll().stream()
                 .map(organisationProfileMapper::toDTO)
+                .peek(this::applyDefaultProfilePicture)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public OProfileResponseDTO getOrganisationProfileById(UUID id) {
-        return organisationRepository.findById(id)
+        OProfileResponseDTO responseDTO = organisationRepository.findById(id)
                 .map(organisationProfileMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found with id: " + id));
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional(readOnly = true)
     public OProfileResponseDTO getOrganisationProfileByUserId(UUID userId) {
-        return organisationRepository.findByUserId(userId)
+        OProfileResponseDTO responseDTO = organisationRepository.findByUserId(userId)
                 .map(organisationProfileMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found for user id: " + userId));
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -134,7 +182,9 @@ public class ProfileService {
         profile.setVerified(false);
 
         organisationRepository.save(profile);
-        return organisationProfileMapper.toDTO(profile);
+        OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(profile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -145,7 +195,24 @@ public class ProfileService {
         organisationProfileMapper.updateEntity(organisationProfile, updateDTO);
         organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
-        return organisationProfileMapper.toDTO(organisationProfile);
+        OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
+    }
+
+    @Transactional
+    public OProfileResponseDTO uploadOrganisationProfilePicture(UUID userId, MultipartFile file) {
+        OrganisationProfile organisationProfile = organisationRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found for user id: " + userId));
+
+        String storedFileUrl = fileUploadService.uploadProfilePicture(file, userId);
+        organisationProfile.setProfilePictureUrl(storedFileUrl);
+        organisationProfile.setLastUpdated(LocalDateTime.now());
+        organisationRepository.save(organisationProfile);
+
+        OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -156,7 +223,9 @@ public class ProfileService {
         organisationProfile.setVerified(true);
         organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
-        return organisationProfileMapper.toDTO(organisationProfile);
+        OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
+        applyDefaultProfilePicture(responseDTO);
+        return responseDTO;
     }
 
     @Transactional
@@ -164,5 +233,17 @@ public class ProfileService {
         OrganisationProfile profile = organisationRepository.findById(profileId)
                 .orElseThrow(() -> new ResourceNotFoundException("Profile not found with id: " + profileId));
         organisationRepository.delete(profile);
+    }
+
+    private void applyDefaultProfilePicture(VProfileResponseDTO responseDTO) {
+        if (responseDTO.getProfilePictureUrl() == null || responseDTO.getProfilePictureUrl().isBlank()) {
+            responseDTO.setProfilePictureUrl(fileUploadProperties.getDefaultProfilePictureUrl());
+        }
+    }
+
+    private void applyDefaultProfilePicture(OProfileResponseDTO responseDTO) {
+        if (responseDTO.getProfilePictureUrl() == null || responseDTO.getProfilePictureUrl().isBlank()) {
+            responseDTO.setProfilePictureUrl(fileUploadProperties.getDefaultProfilePictureUrl());
+        }
     }
 }
