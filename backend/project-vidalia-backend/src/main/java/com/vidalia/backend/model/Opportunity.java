@@ -54,7 +54,7 @@ public class Opportunity {
     private OpportunityStatus status = OpportunityStatus.OPEN;
 
     @Min(value = 0, message = "Minimum age cannot be negative")
-    @Max(value = 21, message = "Minimum age cannot exceed 21")
+    @Max(value = 120, message = "Minimum age cannot exceed 120")
     @Column(name = "min_age")
     private Integer minAge;
 
@@ -68,7 +68,7 @@ public class Opportunity {
     @Column(name = "recurring")
     private Boolean recurring;
 
-    @Min(value = 0, message = "Required hours cannot be negative")
+    @Min(value = 1, message = "Required hours must be at least 1")
     @Column(name = "required_hours")
     private Integer requiredHours;
 
@@ -88,5 +88,16 @@ public class Opportunity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "organisation_profile_id", nullable = false)
     private OrganisationProfile organisationProfile;
-    
+
+    @PrePersist
+    private void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        dateCreated = now;
+        lastUpdated = now;
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        lastUpdated = LocalDateTime.now();
+    }
 }

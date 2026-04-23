@@ -1,4 +1,4 @@
-package com.vidalia.backend.controller;
+package com.vidalia.backend.controller.user;
 
 import com.vidalia.backend.dto.user.UpdateUserDTO;
 import com.vidalia.backend.dto.user.UpdateUserPasswordDTO;
