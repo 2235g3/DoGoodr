@@ -79,4 +79,16 @@ public class VolunteerProfile {
     @Column(name = "points_balance", nullable = false)
     private Integer pointsBalance = 0;
 
+    @PrePersist
+    private void onCreate() {
+        if (lastUpdated == null) {
+            lastUpdated = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        lastUpdated = LocalDateTime.now();
+    }
+
 }

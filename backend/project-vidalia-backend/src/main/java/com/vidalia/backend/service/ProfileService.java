@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -80,7 +79,6 @@ public class ProfileService {
 
         VolunteerProfile profile = volunteerProfileMapper.toEntity(dto);
         profile.setUser(user);
-        profile.setLastUpdated(LocalDateTime.now());
         profile.setPointsBalance(0);
 
         volunteerRepository.save(profile);
@@ -95,7 +93,6 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));
 
         volunteerProfileMapper.updateEntity(volunteerProfile, updateDTO);
-        volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
         VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
         applyDefaultProfilePicture(responseDTO);
@@ -113,7 +110,6 @@ public class ProfileService {
 
         String storedFileUrl = fileUploadService.uploadProfilePicture(file, userId);
         volunteerProfile.setProfilePictureUrl(storedFileUrl);
-        volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
 
         VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
@@ -132,7 +128,6 @@ public class ProfileService {
 
         String storedFileUrl = fileUploadService.uploadCV(file, userId);
         volunteerProfile.setCvUrl(storedFileUrl);
-        volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
 
         VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
@@ -150,7 +145,6 @@ public class ProfileService {
         }
 
         volunteerProfile.setProfilePictureUrl(null);
-        volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
 
         VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
@@ -168,7 +162,6 @@ public class ProfileService {
         }
 
         volunteerProfile.setCvUrl(null);
-        volunteerProfile.setLastUpdated(LocalDateTime.now());
         volunteerRepository.save(volunteerProfile);
 
         VProfileResponseDTO responseDTO = volunteerProfileMapper.toDTO(volunteerProfile);
@@ -222,7 +215,6 @@ public class ProfileService {
 
         OrganisationProfile profile = organisationProfileMapper.toEntity(dto);
         profile.setUser(user);
-        profile.setLastUpdated(LocalDateTime.now());
         profile.setVerified(false);
 
         organisationRepository.save(profile);
@@ -237,7 +229,6 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found for user id: " + userId));
 
         organisationProfileMapper.updateEntity(organisationProfile, updateDTO);
-        organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
         OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
         applyDefaultProfilePicture(responseDTO);
@@ -251,7 +242,6 @@ public class ProfileService {
 
         String storedFileUrl = fileUploadService.uploadProfilePicture(file, userId);
         organisationProfile.setProfilePictureUrl(storedFileUrl);
-        organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
 
         OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
@@ -265,7 +255,6 @@ public class ProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found with id: " + profileId));
 
         organisationProfile.setVerified(true);
-        organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
         OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);
         applyDefaultProfilePicture(responseDTO);
@@ -289,7 +278,6 @@ public class ProfileService {
         }
 
         organisationProfile.setProfilePictureUrl(null);
-        organisationProfile.setLastUpdated(LocalDateTime.now());
         organisationRepository.save(organisationProfile);
 
         OProfileResponseDTO responseDTO = organisationProfileMapper.toDTO(organisationProfile);

@@ -1,4 +1,4 @@
-package com.vidalia.backend.controller;
+package com.vidalia.backend.controller.profile;
 
 import com.vidalia.backend.dto.profile.OProfileResponseDTO;
 import com.vidalia.backend.service.ProfileService;

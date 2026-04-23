@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -54,5 +56,19 @@ public class OrganisationProfile {
     @Column(name = "verified", nullable = false)
     private boolean verified;
 
+    @OneToMany(mappedBy = "organisationProfile", cascade = CascadeType.ALL, orphanRemoval = false)
+    private List<Opportunity> opportunities = new ArrayList<>();
+
+    @PrePersist
+    private void onCreate() {
+        if (lastUpdated == null) {
+            lastUpdated = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        lastUpdated = LocalDateTime.now();
+    }
 
 }

@@ -6,8 +6,6 @@ import com.vidalia.backend.dto.profile.VProfileResponseDTO;
 import com.vidalia.backend.model.VolunteerProfile;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 public class VolunteerProfileMapper {
 
@@ -74,8 +72,6 @@ public class VolunteerProfileMapper {
         if (dto.getAvailability() != null) {
             profile.setAvailability(dto.getAvailability());
         }
-
-        profile.setLastUpdated(LocalDateTime.now());
     }
 
 
