@@ -49,6 +49,14 @@ public class OpportunityService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public OpportunityResponseDTO getOpportunityByIdForOrganisation(UUID opportunityId, UUID organisationId) {
+        return opportunityRepository.findByIdAndOrganisationProfileId(opportunityId, organisationId)
+                .map(opportunityMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Opportunity not found with id: " + opportunityId + " for organisation id: " + organisationId));
+    }
+
     @Transactional
     public OpportunityResponseDTO createOpportunity(CreateOpportunityDTO dto, UUID profileId) {
         //Find owner profile
@@ -72,9 +80,27 @@ public class OpportunityService {
         return opportunityMapper.toDTO(opportunityRepository.save(opportunity));
     }
 
+    @Transactional
+    public OpportunityResponseDTO updateOpportunityForOrganisation(UUID id, UpdateOpportunityDTO dto, UUID organisationId) {
+        Opportunity opportunity = opportunityRepository.findByIdAndOrganisationProfileId(id, organisationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Opportunity not found with id: " + id + " for organisation id: " + organisationId));
+
+        opportunityMapper.updateEntity(opportunity, dto);
+        opportunity.setLastUpdated(LocalDateTime.now());
+        return opportunityMapper.toDTO(opportunityRepository.save(opportunity));
+    }
+
     public void deleteOpportunity(UUID id) {
         Opportunity opportunity = opportunityRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + id));
+        opportunityRepository.delete(opportunity);
+    }
+
+    public void deleteOpportunityForOrganisation(UUID id, UUID organisationId) {
+        Opportunity opportunity = opportunityRepository.findByIdAndOrganisationProfileId(id, organisationId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Opportunity not found with id: " + id + " for organisation id: " + organisationId));
         opportunityRepository.delete(opportunity);
     }
 
