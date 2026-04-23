@@ -59,5 +59,16 @@ public class OrganisationProfile {
     @OneToMany(mappedBy = "organisationProfile", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Opportunity> opportunities = new ArrayList<>();
 
+    @PrePersist
+    private void onCreate() {
+        if (lastUpdated == null) {
+            lastUpdated = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    private void onUpdate() {
+        lastUpdated = LocalDateTime.now();
+    }
 
 }

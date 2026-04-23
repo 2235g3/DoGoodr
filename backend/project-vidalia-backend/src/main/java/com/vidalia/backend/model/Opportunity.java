@@ -77,7 +77,7 @@ public class Opportunity {
     private Integer capacity;
 
     @NotNull(message = "Creation date cannot be null")
-    @Column(name = "date_created", nullable = false)
+    @Column(name = "date_created", nullable = false, updatable = false)
     private LocalDateTime dateCreated;
 
     @NotNull(message = "Last updated date cannot be null")

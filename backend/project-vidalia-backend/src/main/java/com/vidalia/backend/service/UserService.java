@@ -20,7 +20,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -78,8 +77,6 @@ public class UserService {
         }
 
         User user = userMapper.toEntity(createUserDTO);
-        LocalDateTime now = LocalDateTime.now();
-        user.setCreatedAt(now);
 
         //Hash password before saving entity
         user.setPassword(passwordEncoder.encode(createUserDTO.getPassword()));

@@ -45,7 +45,7 @@ public class User {
     @Column(length = 16) //Phone number is stored with + sign
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column()
@@ -55,4 +55,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @PrePersist
+    private void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

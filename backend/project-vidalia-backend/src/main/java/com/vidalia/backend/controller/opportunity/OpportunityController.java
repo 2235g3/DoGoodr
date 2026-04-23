@@ -38,7 +38,7 @@ public class OpportunityController {
 
     @GetMapping("/organisation/{organisationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
-    public ResponseEntity<List<OpportunityResponseDTO>> getOpportunitiesByOrganisation(@PathVariable UUID organisationId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<OpportunityResponseDTO>> getOpportunitiesByOrganisation(@PathVariable UUID organisationId) {
         return ResponseEntity.ok(opportunityService.getAllOpportunitiesByOrganisation(organisationId));
     }
 

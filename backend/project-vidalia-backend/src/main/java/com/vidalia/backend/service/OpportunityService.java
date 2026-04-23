@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,8 +64,6 @@ public class OpportunityService {
 
         Opportunity opportunity = opportunityMapper.toEntity(dto);
         opportunity.setOrganisationProfile(owner);
-        opportunity.setDateCreated(LocalDateTime.now());
-        opportunity.setLastUpdated(LocalDateTime.now());
         return opportunityMapper.toDTO(opportunityRepository.save(opportunity));
     }
 
@@ -76,7 +73,6 @@ public class OpportunityService {
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + id));
 
         opportunityMapper.updateEntity(opportunity, dto);
-        opportunity.setLastUpdated(LocalDateTime.now());
         return opportunityMapper.toDTO(opportunityRepository.save(opportunity));
     }
 
@@ -87,7 +83,6 @@ public class OpportunityService {
                         "Opportunity not found with id: " + id + " for organisation id: " + organisationId));
 
         opportunityMapper.updateEntity(opportunity, dto);
-        opportunity.setLastUpdated(LocalDateTime.now());
         return opportunityMapper.toDTO(opportunityRepository.save(opportunity));
     }
 

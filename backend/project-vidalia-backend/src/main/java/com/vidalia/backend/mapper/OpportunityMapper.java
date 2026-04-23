@@ -7,8 +7,6 @@ import com.vidalia.backend.model.Opportunity;
 import com.vidalia.backend.model.OpportunityStatus;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 public class OpportunityMapper {
 
@@ -92,7 +90,5 @@ public class OpportunityMapper {
         if (dto.getCapacity() != null) {
             opportunity.setCapacity(dto.getCapacity());
         }
-
-        opportunity.setLastUpdated(LocalDateTime.now());
     }
 }
