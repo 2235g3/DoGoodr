@@ -89,6 +89,7 @@ public class SemanticTagManagementService {
         semanticTagRepository.delete(tag);
     }
 
+    @Transactional
     public void setSemanticRelationship(SemanticLinkDTO link) {
         String oneName = normalizeTagName(link.getOne().getName(), "First semantic tag name cannot be blank");
         String twoName = normalizeTagName(link.getTwo().getName(), "Second semantic tag name cannot be blank");
