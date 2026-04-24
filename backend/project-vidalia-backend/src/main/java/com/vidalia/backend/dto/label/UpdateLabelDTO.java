@@ -1,13 +1,13 @@
 package com.vidalia.backend.dto.label;
 
 import com.vidalia.backend.model.matchmaking.LabelType;
+import com.vidalia.backend.model.matchmaking.SemanticTag;
 import lombok.Data;
 
 @Data
-public class LabelDTO {
-    private Long id;
+public class UpdateLabelDTO {
     private String name;
-    private String semanticTag;
-    private boolean required;
+    private SemanticTag semanticTag;
+    private Boolean required;
     private LabelType type;
 }

@@ -1,6 +1,6 @@
 package com.vidalia.backend.service;
 
-import com.vidalia.backend.dto.label.LabelDTO;
+import com.vidalia.backend.dto.label.AssignedLabelDTO;
 import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.model.matchmaking.Label;
 import com.vidalia.backend.model.matchmaking.OpportunityLabelLink;
@@ -41,7 +41,7 @@ public class LabelAssignmentService {
     private final OpportunityRepository opportunityRepository;
 
     @Transactional
-    public void setVolunteerLabels(List<LabelDTO> labels, UUID volunteerId) {
+    public void setVolunteerLabels(List<AssignedLabelDTO> labels, UUID volunteerId) {
         volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer not found with id: " + volunteerId));
 
@@ -50,29 +50,29 @@ public class LabelAssignmentService {
         volunteerLabelLinkRepository.deleteAllByVolunteerId(volunteerId);
 
         List<VolunteerLabelLink> links = new ArrayList<>();
-        for (LabelDTO labelDTO : labels) {
-            Label label = labelsById.get(labelDTO.getLabelId());
-            links.add(new VolunteerLabelLink(volunteerId, label, labelDTO.getWeight()));
+        for (AssignedLabelDTO assignedLabelDTO : labels) {
+            Label label = labelsById.get(assignedLabelDTO.getLabelId());
+            links.add(new VolunteerLabelLink(volunteerId, label, assignedLabelDTO.getWeight()));
         }
 
         volunteerLabelLinkRepository.saveAll(links);
     }
 
     @Transactional(readOnly = true)
-    public List<LabelDTO> getVolunteerLabels(UUID volunteerId) {
+    public List<AssignedLabelDTO> getVolunteerLabels(UUID volunteerId) {
         volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer not found with id: " + volunteerId));
 
         List<VolunteerLabelLink> links = volunteerLabelLinkRepository.findAllByVolunteerId(volunteerId);
-        List<LabelDTO> dtos = new ArrayList<>();
+        List<AssignedLabelDTO> dtos = new ArrayList<>();
         for (VolunteerLabelLink link : links) {
-            dtos.add(new LabelDTO(link.getLabel().getId(), link.getWeight()));
+            dtos.add(new AssignedLabelDTO(link.getLabel().getId(), link.getWeight()));
         }
         return dtos;
     }
 
     @Transactional
-    public void setOrganisationLabels(List<LabelDTO> labels, UUID organisationId) {
+    public void setOrganisationLabels(List<AssignedLabelDTO> labels, UUID organisationId) {
         organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found with id: " + organisationId));
 
@@ -81,29 +81,29 @@ public class LabelAssignmentService {
         organisationLabelLinkRepository.deleteAllByOrganisationId(organisationId);
 
         List<OrganisationLabelLink> links = new ArrayList<>();
-        for (LabelDTO labelDTO : labels) {
-            Label label = labelsById.get(labelDTO.getLabelId());
-            links.add(new OrganisationLabelLink(organisationId, label, labelDTO.getWeight()));
+        for (AssignedLabelDTO assignedLabelDTO : labels) {
+            Label label = labelsById.get(assignedLabelDTO.getLabelId());
+            links.add(new OrganisationLabelLink(organisationId, label, assignedLabelDTO.getWeight()));
         }
 
         organisationLabelLinkRepository.saveAll(links);
     }
 
     @Transactional(readOnly = true)
-    public List<LabelDTO> getOrganisationLabels(UUID organisationId) {
+    public List<AssignedLabelDTO> getOrganisationLabels(UUID organisationId) {
         organisationRepository.findById(organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation not found with id: " + organisationId));
 
         List<OrganisationLabelLink> links = organisationLabelLinkRepository.findAllByOrganisationId(organisationId);
-        List<LabelDTO> dtos = new ArrayList<>();
+        List<AssignedLabelDTO> dtos = new ArrayList<>();
         for (OrganisationLabelLink link : links) {
-            dtos.add(new LabelDTO(link.getLabel().getId(), link.getWeight()));
+            dtos.add(new AssignedLabelDTO(link.getLabel().getId(), link.getWeight()));
         }
         return dtos;
     }
 
     @Transactional
-    public void setOpportunityLabels(List<LabelDTO> labels, UUID opportunityId) {
+    public void setOpportunityLabels(List<AssignedLabelDTO> labels, UUID opportunityId) {
         opportunityRepository.findById(opportunityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + opportunityId));
 
@@ -112,9 +112,9 @@ public class LabelAssignmentService {
         opportunityLabelLinkRepository.deleteAllByOpportunityId(opportunityId);
 
         List<OpportunityLabelLink> links = new ArrayList<>();
-        for (LabelDTO labelDTO : labels) {
-            Label label = labelsById.get(labelDTO.getLabelId());
-            links.add(new OpportunityLabelLink(opportunityId, label, labelDTO.getWeight()));
+        for (AssignedLabelDTO assignedLabelDTO : labels) {
+            Label label = labelsById.get(assignedLabelDTO.getLabelId());
+            links.add(new OpportunityLabelLink(opportunityId, label, assignedLabelDTO.getWeight()));
         }
 
         opportunityLabelLinkRepository.saveAll(links);
@@ -122,14 +122,14 @@ public class LabelAssignmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<LabelDTO> getOpportunityLabels(UUID opportunityId) {
+    public List<AssignedLabelDTO> getOpportunityLabels(UUID opportunityId) {
         opportunityRepository.findById(opportunityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + opportunityId));
 
         List<OpportunityLabelLink> links = opportunityLabelLinkRepository.findAllByOpportunityId(opportunityId);
-        List<LabelDTO> dtos = new ArrayList<>();
+        List<AssignedLabelDTO> dtos = new ArrayList<>();
         for (OpportunityLabelLink link : links) {
-            dtos.add(new LabelDTO(link.getLabel().getId(), link.getWeight()));
+            dtos.add(new AssignedLabelDTO(link.getLabel().getId(), link.getWeight()));
         }
         return dtos;
 
@@ -137,11 +137,11 @@ public class LabelAssignmentService {
 
 
     // Checks the list of labels for duplicates and existence, then returns a map of label id to label entity for all valid labels
-    private Map<Long, Label> validateLabelList(List<LabelDTO> labels) {
+    private Map<Long, Label> validateLabelList(List<AssignedLabelDTO> labels) {
         Set<Long> labelIds = new HashSet<>();
-        for (LabelDTO labelDTO : labels) {
-            if (!labelIds.add(labelDTO.getLabelId())) {
-                throw new IllegalArgumentException("Duplicate label id in request: " + labelDTO.getLabelId());
+        for (AssignedLabelDTO assignedLabelDTO : labels) {
+            if (!labelIds.add(assignedLabelDTO.getLabelId())) {
+                throw new IllegalArgumentException("Duplicate label id in request: " + assignedLabelDTO.getLabelId());
             }
         }
 

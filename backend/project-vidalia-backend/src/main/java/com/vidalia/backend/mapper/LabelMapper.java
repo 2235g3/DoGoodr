@@ -1,6 +1,7 @@
 package com.vidalia.backend.mapper;
 
 import com.vidalia.backend.dto.label.CreateLabelDTO;
+import com.vidalia.backend.dto.label.LabelDTO;
 import com.vidalia.backend.model.matchmaking.Label;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,16 @@ public class LabelMapper {
         label.setRequired(dto.isRequired());
         label.setType(dto.getType());
         return label;
+    }
+
+    public LabelDTO toDTO(Label label) {
+        LabelDTO dto = new LabelDTO();
+        dto.setId(label.getId());
+        dto.setName(label.getName());
+        dto.setSemanticTag(label.getSemanticTag() != null ? label.getSemanticTag().getName() : null);
+        dto.setRequired(label.isRequired());
+        dto.setType(label.getType());
+        return dto;
     }
 
     public void updateEntity(Label label, CreateLabelDTO dto) {

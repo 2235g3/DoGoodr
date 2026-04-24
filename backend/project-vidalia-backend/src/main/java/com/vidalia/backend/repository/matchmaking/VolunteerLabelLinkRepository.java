@@ -16,5 +16,7 @@ public interface VolunteerLabelLinkRepository extends JpaRepository<VolunteerLab
     Optional<VolunteerLabelLink> findByVolunteerIdAndLabelId(UUID volunteerId, Long labelId);
 
     void deleteAllByVolunteerId(UUID volunteerId);
+
+    void deleteAllByLabelId(Long id);
 }
 
