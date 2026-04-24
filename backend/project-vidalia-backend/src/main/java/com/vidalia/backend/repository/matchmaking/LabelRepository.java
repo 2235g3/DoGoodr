@@ -2,6 +2,7 @@ package com.vidalia.backend.repository.matchmaking;
 
 import com.vidalia.backend.model.matchmaking.Label;
 import com.vidalia.backend.model.matchmaking.LabelType;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,5 +21,7 @@ public interface LabelRepository extends JpaRepository<Label, Long> {
     List<Label> findAllByTypeIn(Collection<LabelType> types);
 
     List<Label> findAllBySemanticTagId(Long semanticTagId);
+
+    boolean existsByName(@NotNull String name);
 }
 
