@@ -11,5 +11,7 @@ public interface SemanticTagRepository extends JpaRepository<SemanticTag, Long> 
     Optional<SemanticTag> findByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCase(String name);
+
+    Optional<SemanticTag> findByName(String name);
 }
 
