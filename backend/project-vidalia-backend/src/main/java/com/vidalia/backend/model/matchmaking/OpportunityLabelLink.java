@@ -22,8 +22,7 @@ public class OpportunityLabelLink {
     @JoinColumn(name = "label_id")
     private Label label;
 
-    @Column(name = "opportunity_id", insertable = false, updatable = false)
-    private UUID opportunityId;
+    // The composite key (OpportunityLabelKey) contains opportunityId; avoid duplicating column mapping
 
     @Column(nullable = false)
     private double weight;
@@ -33,6 +32,10 @@ public class OpportunityLabelLink {
         this.label = label;
         this.weight = weight;
 
+    }
+
+    public UUID getOpportunityId() {
+        return this.id != null ? this.id.getOpportunityId() : null;
     }
 
 }

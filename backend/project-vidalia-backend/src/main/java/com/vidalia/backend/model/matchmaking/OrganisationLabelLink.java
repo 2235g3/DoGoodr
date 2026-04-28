@@ -22,8 +22,7 @@ public class OrganisationLabelLink {
     @JoinColumn(name = "label_id")
     private Label label;
 
-    @Column(name = "organisation_id", insertable = false, updatable = false)
-    private UUID organisationId;
+    // The composite key (OrganisationLabelKey) contains organisationId; avoid duplicating column mapping
 
     @Column(nullable = false)
     private double weight;
@@ -32,5 +31,9 @@ public class OrganisationLabelLink {
         this.id = new OrganisationLabelKey(orgId, label.getId());
         this.label = label;
         this.weight = weight;
+    }
+
+    public UUID getOrganisationId() {
+        return this.id != null ? this.id.getOrganisationId() : null;
     }
 }

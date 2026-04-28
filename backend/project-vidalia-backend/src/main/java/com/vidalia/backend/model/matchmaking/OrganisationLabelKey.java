@@ -16,6 +16,14 @@ public class OrganisationLabelKey implements Serializable {
     private UUID organisationId;
     private Long labelId;
 
+    public UUID getOrganisationId() {
+        return organisationId;
+    }
+
+    public Long getLabelId() {
+        return labelId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
