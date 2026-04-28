@@ -17,10 +17,29 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.util.HtmlUtils;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    private static final int MAX_DETAIL_LENGTH = 300;
+
+    /**
+     * Sanitize a string intended for inclusion in a JSON response so that
+     * if a browser renders it inside HTML it won't execute untrusted markup.
+     * We HTML-escape the value, strip newlines and truncate long values.
+     */
+    private String sanitize(String input) {
+        if (input == null) return null;
+        String escaped = HtmlUtils.htmlEscape(input);
+        // Collapse newlines to spaces to avoid header/body injection vectors in some renderers
+        escaped = escaped.replaceAll("[\\r\\n]+", " ");
+        if (escaped.length() > MAX_DETAIL_LENGTH) {
+            return escaped.substring(0, MAX_DETAIL_LENGTH) + "...";
+        }
+        return escaped;
+    }
 
     /**
      * Handle ResourceNotFoundException - 404
@@ -36,8 +55,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         errorResponse.setMessage("Resource not found");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
@@ -56,8 +75,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.CONFLICT.value());
         errorResponse.setMessage("Resource already exists");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
@@ -76,8 +95,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
         errorResponse.setMessage("Incorrect password");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
@@ -96,8 +115,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("File upload validation failed");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -116,8 +135,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         errorResponse.setMessage("Failed to store file");
-        errorResponse.setDetails("An error occurred while processing your file. Please try again later.");
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize("An error occurred while processing your file. Please try again later."));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
@@ -136,8 +155,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("Failed to create resource");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -156,8 +175,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("Invalid argument");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -196,8 +215,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
         errorResponse.setMessage("Access denied");
-        errorResponse.setDetails("You do not have permission to access this resource");
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize("You do not have permission to access this resource"));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
@@ -218,7 +237,7 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            fieldErrors.put(fieldName, errorMessage);
+            fieldErrors.put(sanitize(fieldName), sanitize(errorMessage));
         });
 
         ErrorResponse errorResponse = new ErrorResponse();
@@ -246,8 +265,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("Malformed request body");
-        errorResponse.setDetails("Please check your JSON format and required fields");
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize("Please check your JSON format and required fields"));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -266,8 +285,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         errorResponse.setMessage("An unexpected error occurred");
-        errorResponse.setDetails("Please contact support if the problem persists");
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize("Please contact support if the problem persists"));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
