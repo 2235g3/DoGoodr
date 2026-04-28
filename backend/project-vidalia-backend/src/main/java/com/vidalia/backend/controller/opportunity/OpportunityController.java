@@ -7,7 +7,7 @@ import com.vidalia.backend.dto.profile.OProfileResponseDTO;
 import com.vidalia.backend.model.Role;
 import com.vidalia.backend.security.CustomUserDetails;
 import com.vidalia.backend.service.OpportunityService;
-import com.vidalia.backend.service.ProfileService;
+import com.vidalia.backend.service.OrganisationProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +23,11 @@ import java.util.UUID;
 public class OpportunityController {
 
     private final OpportunityService opportunityService;
-    private final ProfileService profileService;
+    private final OrganisationProfileService organisationProfileService;
 
-    public OpportunityController(OpportunityService opportunityService, ProfileService profileService) {
+    public OpportunityController(OpportunityService opportunityService, OrganisationProfileService organisationProfileService) {
         this.opportunityService = opportunityService;
-        this.profileService = profileService;
+        this.organisationProfileService = organisationProfileService;
     }
 
     @GetMapping("/")
@@ -81,7 +81,7 @@ public class OpportunityController {
     }
 
     private UUID getMyOrganisationId(CustomUserDetails userDetails) {
-        OProfileResponseDTO profile = profileService.getOrganisationProfileByUserId(userDetails.getId());
+        OProfileResponseDTO profile = organisationProfileService.getOrganisationProfileByUserId(userDetails.getId());
         return profile.getId();
     }
 }

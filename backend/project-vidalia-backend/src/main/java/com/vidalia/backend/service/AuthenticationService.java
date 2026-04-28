@@ -26,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationService {
 
     private final UserService userService;
-    private final ProfileService profileService;
+    private final OrganisationProfileService organisationProfileService;
+    private final VolunteerProfileService volunteerProfileService;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -87,7 +88,7 @@ public class AuthenticationService {
         profileDTO.setPreferredName(request.getPreferedName());
         profileDTO.setDateOfBirth(request.getDateOfBirth());
 
-        profileService.createVolunteerProfile(profileDTO, savedUser.getId());
+        volunteerProfileService.createVolunteerProfile(profileDTO, savedUser.getId());
         return issueTokensForUser(savedUser);
     }
 
@@ -100,7 +101,7 @@ public class AuthenticationService {
         profileDTO.setDisplayName(request.getDisplayName());
         profileDTO.setAccountType(request.getAccountType());
 
-        profileService.createOrganisationProfile(profileDTO, savedUser.getId());
+        organisationProfileService.createOrganisationProfile(profileDTO, savedUser.getId());
         return issueTokensForUser(savedUser);
     }
 

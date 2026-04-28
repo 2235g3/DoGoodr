@@ -3,7 +3,7 @@ package com.vidalia.backend.controller.profile;
 import com.vidalia.backend.dto.profile.UpdateVolunteerProfileDTO;
 import com.vidalia.backend.dto.profile.VProfileResponseDTO;
 import com.vidalia.backend.security.CustomUserDetails;
-import com.vidalia.backend.service.ProfileService;
+import com.vidalia.backend.service.VolunteerProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +19,9 @@ import java.util.UUID;
 @PreAuthorize("hasRole('VOLUNTEER')")
 public class VolunteerProfileController {
 
-    private final ProfileService profileService;
+    private final VolunteerProfileService profileService;
 
-    public VolunteerProfileController(ProfileService profileService) {
+    public VolunteerProfileController(VolunteerProfileService profileService) {
         this.profileService = profileService;
     }
 

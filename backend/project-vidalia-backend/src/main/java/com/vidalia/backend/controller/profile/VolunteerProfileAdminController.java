@@ -1,7 +1,7 @@
 package com.vidalia.backend.controller.profile;
 
 import com.vidalia.backend.dto.profile.VProfileResponseDTO;
-import com.vidalia.backend.service.ProfileService;
+import com.vidalia.backend.service.VolunteerProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +14,9 @@ import java.util.UUID;
 @PreAuthorize("hasRole('ADMIN')")
 public class VolunteerProfileAdminController {
 
-    private final ProfileService profileService;
+    private final VolunteerProfileService profileService;
 
-    public VolunteerProfileAdminController(ProfileService profileService) {
+    public VolunteerProfileAdminController(VolunteerProfileService profileService) {
         this.profileService = profileService;
     }
 

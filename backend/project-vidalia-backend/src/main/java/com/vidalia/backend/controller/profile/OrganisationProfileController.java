@@ -3,7 +3,7 @@ package com.vidalia.backend.controller.profile;
 import com.vidalia.backend.dto.profile.OProfileResponseDTO;
 import com.vidalia.backend.dto.profile.UpdateOrganisationProfileDTO;
 import com.vidalia.backend.security.CustomUserDetails;
-import com.vidalia.backend.service.ProfileService;
+import com.vidalia.backend.service.OrganisationProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,23 +19,23 @@ import java.util.UUID;
 @PreAuthorize("hasRole('ORGANISATION')")
 public class OrganisationProfileController {
 
-    private final ProfileService profileService;
+    private final OrganisationProfileService organisationProfileService;
 
-    public OrganisationProfileController(ProfileService profileService) {
-        this.profileService = profileService;
+    public OrganisationProfileController(OrganisationProfileService organisationProfileService) {
+        this.organisationProfileService = organisationProfileService;
     }
 
     @GetMapping("/me")
     public ResponseEntity<OProfileResponseDTO> getMyOrganisationProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
-        return ResponseEntity.ok(profileService.getOrganisationProfileByUserId(userId));
+        return ResponseEntity.ok(organisationProfileService.getOrganisationProfileByUserId(userId));
     }
 
     @PutMapping("/me")
     public ResponseEntity<OProfileResponseDTO> updateMyOrganisationProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                            @Valid @RequestBody UpdateOrganisationProfileDTO updateDTO) {
         UUID userId = userDetails.getId();
-        return ResponseEntity.ok(profileService.updateOrganisationProfile(updateDTO, userId));
+        return ResponseEntity.ok(organisationProfileService.updateOrganisationProfile(updateDTO, userId));
     }
 
     @PutMapping(value = "/me/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,13 +43,13 @@ public class OrganisationProfileController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("file") MultipartFile file) {
         UUID userId = userDetails.getId();
-        return ResponseEntity.ok(profileService.uploadOrganisationProfilePicture(userId, file));
+        return ResponseEntity.ok(organisationProfileService.uploadOrganisationProfilePicture(userId, file));
     }
 
     @DeleteMapping("/me/profile-picture")
     public ResponseEntity<OProfileResponseDTO> deleteMyOrganisationProfilePicture(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
-        return ResponseEntity.ok(profileService.deleteOrganisationProfilePicture(userId));
+        return ResponseEntity.ok(organisationProfileService.deleteOrganisationProfilePicture(userId));
     }
 }
