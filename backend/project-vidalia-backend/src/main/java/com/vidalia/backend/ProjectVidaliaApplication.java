@@ -9,11 +9,13 @@ public class ProjectVidaliaApplication {
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(ProjectVidaliaApplication.class);
 
-        // UPDATE_THIS_BEFORE_USE
-        // prod - for production use
-        // dev - for development use
-        // test - only for running tests
-        app.setAdditionalProfiles("dev");
+		// Allow profile to be set via SPRING_PROFILES_ACTIVE env var
+		// Default to 'dev' if not specified (for backwards compatibility)
+		String activeProfile = System.getenv("SPRING_PROFILES_ACTIVE");
+		if (activeProfile == null || activeProfile.isBlank()) {
+			activeProfile = "dev";
+		}
+		app.setAdditionalProfiles(activeProfile);
         app.run(args);
 	}
 

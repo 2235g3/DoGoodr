@@ -21,8 +21,7 @@ public class VolunteerLabelLink {
     @JoinColumn(name = "label_id")
     private Label label;
 
-    @Column(name = "volunteer_id", insertable = false, updatable = false)
-    private UUID volunteerId;
+    // The composite key (VolunteerLabelKey) contains volunteerId; avoid duplicating column mapping
 
     @Column(nullable = false)
     private double weight;
@@ -32,6 +31,10 @@ public class VolunteerLabelLink {
         this.id = new VolunteerLabelKey(volunteerId, label.getId());
         this.label = label;
         this.weight = weight;
+    }
+
+    public UUID getVolunteerId() {
+        return this.id != null ? this.id.getVolunteerId() : null;
     }
 
 }

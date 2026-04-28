@@ -17,6 +17,14 @@ public class VolunteerLabelKey implements Serializable {
     private UUID volunteerId;
     private Long labelId;
 
+    public UUID getVolunteerId() {
+        return volunteerId;
+    }
+
+    public Long getLabelId() {
+        return labelId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

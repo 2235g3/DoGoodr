@@ -16,6 +16,14 @@ public class OpportunityLabelKey implements Serializable {
     private UUID opportunityId;
     private Long labelId;
 
+    public UUID getOpportunityId() {
+        return opportunityId;
+    }
+
+    public Long getLabelId() {
+        return labelId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
