@@ -1,5 +1,6 @@
 package com.vidalia.backend.security;
 
+import com.vidalia.backend.config.WebSocketProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final WebSocketProperties webSocketProperties;
 
     @Value("${app.security.allow-h2-console:false}")
     private boolean allowH2;
@@ -34,7 +36,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/").permitAll()
+                        .requestMatchers("/api/auth/**", "/", webSocketProperties.getEndpoint(), webSocketProperties.getEndpoint() + "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
