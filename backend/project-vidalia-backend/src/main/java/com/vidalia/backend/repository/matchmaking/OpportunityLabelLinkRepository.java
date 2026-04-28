@@ -19,5 +19,7 @@ public interface OpportunityLabelLinkRepository extends JpaRepository<Opportunit
     Optional<OpportunityLabelLink> findByOpportunityIdAndLabelId(UUID opportunityId, Long labelId);
 
     void deleteAllByOpportunityId(UUID opportunityId);
+
+    void deleteAllByLabelId(Long id);
 }
 

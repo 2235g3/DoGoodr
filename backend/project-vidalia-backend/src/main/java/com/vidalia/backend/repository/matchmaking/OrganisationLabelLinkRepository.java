@@ -16,5 +16,7 @@ public interface OrganisationLabelLinkRepository extends JpaRepository<Organisat
     Optional<OrganisationLabelLink> findByOrganisationIdAndLabelId(UUID organisationId, Long labelId);
 
     void deleteAllByOrganisationId(UUID organisationId);
+
+    void deleteAllByLabelId(Long id);
 }
 
