@@ -10,6 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpportunityMapper {
 
+    private final OrganisationProfileMapper organisationProfileMapper;
+
+    public OpportunityMapper(OrganisationProfileMapper organisationProfileMapper) {
+        this.organisationProfileMapper = organisationProfileMapper;
+    }
+
     public Opportunity toEntity(CreateOpportunityDTO dto) {
         Opportunity opportunity = new Opportunity();
         opportunity.setTitle(dto.getTitle());
@@ -46,7 +52,9 @@ public class OpportunityMapper {
         dto.setCapacity(opportunity.getCapacity());
         dto.setDateCreated(opportunity.getDateCreated());
         dto.setLastUpdated(opportunity.getLastUpdated());
-        dto.setOrganisationProfile(opportunity.getOrganisationProfile());
+        if (opportunity.getOrganisationProfile() != null) {
+            dto.setOrganisationProfile(organisationProfileMapper.toDTO(opportunity.getOrganisationProfile()));
+        }
         return dto;
     }
 

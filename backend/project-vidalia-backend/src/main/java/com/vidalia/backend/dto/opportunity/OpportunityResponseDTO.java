@@ -1,7 +1,7 @@
 package com.vidalia.backend.dto.opportunity;
 
 import com.vidalia.backend.model.OpportunityStatus;
-import com.vidalia.backend.model.OrganisationProfile;
+import com.vidalia.backend.dto.profile.OProfileResponseDTO;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -26,6 +26,6 @@ public class OpportunityResponseDTO {
     private Integer capacity;
     private LocalDateTime dateCreated;
     private LocalDateTime lastUpdated;
-    private OrganisationProfile organisationProfile;
+    private OProfileResponseDTO organisationProfile;
 
 }
