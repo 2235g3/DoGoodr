@@ -1,4 +1,4 @@
-package com.vidalia.backend.config;
+package com.vidalia.backend.websocket;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +17,5 @@ public class WebSocketProperties {
     private String userDestinationPrefix = "/user";
     private String[] allowedOriginPatterns = new String[]{"*"};
 }
+
 

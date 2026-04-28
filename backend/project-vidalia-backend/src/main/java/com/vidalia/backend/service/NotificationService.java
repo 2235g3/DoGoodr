@@ -23,6 +23,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
+    private final NotificationPushService notificationPushService;
 
     private final UserRepository userRepository;
 
@@ -35,7 +36,7 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public List<NotificationResponseDTO> getAllUnreadNotificationsForUser(UUID userId) {
-        return notificationRepository.findAllUnreadByUserIdOrderByTimestampDesc(userId).stream()
+        return notificationRepository.findAllByUserIdAndReadFalseOrderByTimestampDesc(userId).stream()
                 .map(notificationMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -62,7 +63,9 @@ public class NotificationService {
 
         Notification notification = notificationMapper.toEntity(dto, user);
         Notification savedNotification = notificationRepository.save(notification);
-        return notificationMapper.toDTO(savedNotification);
+        NotificationResponseDTO response = notificationMapper.toDTO(savedNotification);
+        notificationPushService.sendToUser(user.getId(), response);
+        return response;
 
     }
 }

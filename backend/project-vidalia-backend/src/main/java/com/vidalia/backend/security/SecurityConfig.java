@@ -1,6 +1,6 @@
 package com.vidalia.backend.security;
 
-import com.vidalia.backend.config.WebSocketProperties;
+import com.vidalia.backend.websocket.WebSocketProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

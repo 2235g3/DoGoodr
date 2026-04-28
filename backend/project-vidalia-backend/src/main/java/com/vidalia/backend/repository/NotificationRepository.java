@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     List<Notification> findAllByUserIdOrderByTimestampDesc(UUID userId);
-    List<Notification> findAllUnreadByUserIdOrderByTimestampDesc(UUID userId);
+    List<Notification> findAllByUserIdAndReadFalseOrderByTimestampDesc(UUID userId);
 }

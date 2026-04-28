@@ -1,4 +1,4 @@
-package com.vidalia.backend.config;
+package com.vidalia.backend.websocket;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +13,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketProperties webSocketProperties;
+    private final WebSocketHandshakeInterceptor webSocketHandshakeInterceptor;
+    private final WebSocketPrincipalHandshakeHandler webSocketPrincipalHandshakeHandler;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(webSocketProperties.getEndpoint())
+                .addInterceptors(webSocketHandshakeInterceptor)
+                .setHandshakeHandler(webSocketPrincipalHandshakeHandler)
                 .setAllowedOriginPatterns(webSocketProperties.getAllowedOriginPatterns());
     }
 
@@ -27,4 +31,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix(webSocketProperties.getUserDestinationPrefix());
     }
 }
+
 
