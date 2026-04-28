@@ -14,8 +14,6 @@ public interface SemanticLinkRepository extends JpaRepository<SemanticLink, Sema
     Optional<SemanticLink> findByTagOne_IdAndTagTwo_Id(Long tagOneId, Long tagTwoId);
     boolean existsByTagOne_IdAndTagTwo_Id(Long tagOneId, Long tagTwoId);
 
-    List<SemanticLink> id(SemanticLinkId id);
-
     void deleteAllByTagOne_Id(Long id);
     void deleteAllByTagTwo_Id(Long id);
 }
