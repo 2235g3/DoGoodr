@@ -22,6 +22,7 @@ public class OpportunityResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private Boolean recurring;
+    private String availability;
     private Integer requiredHours;
     private Integer capacity;
     private LocalDateTime dateCreated;
