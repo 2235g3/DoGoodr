@@ -25,13 +25,15 @@ public class JwtService {
 	private static final String ACCESS_TOKEN_TYPE = "access";
 	private static final String REFRESH_TOKEN_TYPE = "refresh";
 
-	@Value("${app.security.jwt.secret}")
+	// Provide defaults so the application context can start when no profile-specific
+	// properties file is loaded (e.g. some unit tests use the default profile).
+	@Value("${app.security.jwt.secret:bG9jYWwtZGV2LWp3dC1zZWNyZXQtbXVzdC1iZS1yZXBsYWNlZC0yMDI2}")
 	private String jwtSecret;
 
-	@Value("${app.security.jwt.access-token-expiration-ms}")
+	@Value("${app.security.jwt.access-token-expiration-ms:900000}")
 	private long accessTokenExpirationMs;
 
-	@Value("${app.security.jwt.refresh-token-expiration-ms}")
+	@Value("${app.security.jwt.refresh-token-expiration-ms:2592000000}")
 	private long refreshTokenExpirationMs;
 
 	private SecretKey signingKey;
