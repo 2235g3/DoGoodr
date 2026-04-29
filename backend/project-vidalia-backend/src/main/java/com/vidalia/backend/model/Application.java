@@ -33,6 +33,8 @@ public class Application {
 	@JoinColumn(name = "opportunity_id", nullable = false)
 	private Opportunity opportunity;
 
+	private String message;
+
 	@NotNull(message = "Status cannot be null")
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

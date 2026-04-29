@@ -195,8 +195,8 @@ public class GlobalExceptionHandler {
         errorResponse.setTimestamp(LocalDateTime.now());
         errorResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
         errorResponse.setMessage("Authentication failed");
-        errorResponse.setDetails(ex.getMessage());
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setDetails(sanitize(ex.getMessage()));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
@@ -216,6 +216,26 @@ public class GlobalExceptionHandler {
         errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
         errorResponse.setMessage("Access denied");
         errorResponse.setDetails(sanitize("You do not have permission to access this resource"));
+        errorResponse.setPath(sanitize(request.getRequestURI()));
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    /**
+     * Handle ForbiddenRequestException - 403
+     */
+    @ExceptionHandler(ForbiddenRequestException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenRequestException(
+            ForbiddenRequestException ex,
+            HttpServletRequest request) {
+
+        log.warn("Forbidden request: {}", ex.getMessage());
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(LocalDateTime.now());
+        errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
+        errorResponse.setMessage("Forbidden request");
+        errorResponse.setDetails(sanitize(ex.getMessage()));
         errorResponse.setPath(sanitize(request.getRequestURI()));
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
@@ -245,7 +265,7 @@ public class GlobalExceptionHandler {
         errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setMessage("Validation failed");
         errorResponse.setDetails("One or more fields have validation errors");
-        errorResponse.setPath(request.getRequestURI());
+        errorResponse.setPath(sanitize(request.getRequestURI()));
         errorResponse.setFieldErrors(fieldErrors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
