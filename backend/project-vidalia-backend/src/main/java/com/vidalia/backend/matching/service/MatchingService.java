@@ -8,6 +8,7 @@ import com.vidalia.backend.mapper.OpportunityMapper;
 import com.vidalia.backend.model.Opportunity;
 import com.vidalia.backend.model.OpportunityStatus;
 import com.vidalia.backend.model.VolunteerProfile;
+import com.vidalia.backend.model.matchmaking.LabelType;
 import com.vidalia.backend.model.matchmaking.OpportunityLabelLink;
 import com.vidalia.backend.repository.OpportunityRepository;
 import com.vidalia.backend.repository.VolunteerProfileRepository;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class MatchingService {
+
+    static final double MIN_VIABLE_OPPORTUNITY_SCORE = 0.30d;
+
+    private static final Set<LabelType> SCOREABLE_LABEL_TYPES = Set.of(
+            LabelType.SKILL,
+            LabelType.INTEREST,
+            LabelType.CAUSE
+    );
+
+    private static final Map<LabelType, Double> TYPE_MULTIPLIERS = createTypeMultipliers();
 
     private final VolunteerProfileRepository volunteerProfileRepository;
     private final OpportunityRepository opportunityRepository;
@@ -54,9 +67,11 @@ public class MatchingService {
                 candidates,
                 LocalDate.now()
         );
+        List<MatchedOpportunityDTO> scoredMatches = scoreCandidates(volunteer, volunteerLabels, filteredCandidates);
 
-        return filteredCandidates.stream()
-                .map(this::toMatchedOpportunityDTO)
+        return scoredMatches.stream()
+                .filter(match -> match.getFinalScore() >= MIN_VIABLE_OPPORTUNITY_SCORE)
+                .sorted(Comparator.comparingDouble(MatchedOpportunityDTO::getFinalScore).reversed())
                 .toList();
     }
 
@@ -173,12 +188,41 @@ public class MatchingService {
         return distanceKm <= volunteer.getMaxTravelDistance();
     }
 
-    private MatchedOpportunityDTO toMatchedOpportunityDTO(OpportunityMatchCandidate candidate) {
+    List<MatchedOpportunityDTO> scoreCandidates(VolunteerProfile volunteer,
+                                                Map<Long, MatchLabel> volunteerLabels,
+                                                List<OpportunityMatchCandidate> candidates) {
+        return candidates.stream()
+                .map(candidate -> scoreCandidate(volunteer, volunteerLabels, candidate))
+                .toList();
+    }
+
+    MatchedOpportunityDTO scoreCandidate(VolunteerProfile volunteer,
+                                         Map<Long, MatchLabel> volunteerLabels,
+                                         OpportunityMatchCandidate candidate) {
+        double rawScore = 0d;
+        double opportunityLabelSum = 0d;
+
+        for (OpportunityLabelLink link : candidate.labelsById().values()) {
+            if (!isScoreable(link)) {
+                continue;
+            }
+
+            double typeMultiplier = TYPE_MULTIPLIERS.getOrDefault(link.getLabel().getType(), 0d);
+            double weightedOpportunityLabel = link.getWeight() * typeMultiplier;
+            opportunityLabelSum += weightedOpportunityLabel;
+
+            MatchLabel volunteerLabel = volunteerLabels.get(link.getLabel().getId());
+            if (volunteerLabel != null) {
+                rawScore += volunteerLabel.weight() * weightedOpportunityLabel;
+            }
+        }
+
+        double normalizedScore = opportunityLabelSum > 0d ? rawScore / opportunityLabelSum : 0d;
         MatchedOpportunityDTO dto = new MatchedOpportunityDTO();
         dto.setOpportunity(opportunityMapper.toDTO(candidate.opportunity()));
-        dto.setFinalScore(0d);
-        dto.setNormalizedScore(null);
-        dto.setLocationScore(null);
+        dto.setFinalScore(normalizedScore);
+        dto.setNormalizedScore(normalizedScore);
+        dto.setDistanceKm(calculateDistanceKm(volunteer, candidate.opportunity()));
         return dto;
     }
 
@@ -204,5 +248,34 @@ public class MatchingService {
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return earthRadiusKm * c;
+    }
+
+    private boolean isScoreable(OpportunityLabelLink link) {
+        return link.getLabel() != null
+                && !link.getLabel().isRequired()
+                && SCOREABLE_LABEL_TYPES.contains(link.getLabel().getType());
+    }
+
+    private Double calculateDistanceKm(VolunteerProfile volunteer, Opportunity opportunity) {
+        if (volunteer.getLatitude() == null || volunteer.getLongitude() == null) {
+            return null;
+        }
+        if (opportunity.getLatitude() == null || opportunity.getLongitude() == null) {
+            return null;
+        }
+        return distanceKm(
+                volunteer.getLatitude(),
+                volunteer.getLongitude(),
+                opportunity.getLatitude(),
+                opportunity.getLongitude()
+        );
+    }
+
+    private static Map<LabelType, Double> createTypeMultipliers() {
+        Map<LabelType, Double> multipliers = new EnumMap<>(LabelType.class);
+        multipliers.put(LabelType.SKILL, 0.30d);
+        multipliers.put(LabelType.INTEREST, 0.25d);
+        multipliers.put(LabelType.CAUSE, 0.20d);
+        return Map.copyOf(multipliers);
     }
 }

@@ -8,5 +8,5 @@ public class MatchedOpportunityDTO {
     private OpportunityResponseDTO opportunity;
     private double finalScore;
     private Double normalizedScore;
-    private Double locationScore;
+    private Double distanceKm;
 }
