@@ -2,6 +2,7 @@ package com.vidalia.backend.service;
 
 import com.vidalia.backend.dto.notification.CreateNotificationDTO;
 import com.vidalia.backend.dto.notification.NotificationResponseDTO;
+import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.NotificationMapper;
 import com.vidalia.backend.model.Notification;
 import com.vidalia.backend.model.User;
@@ -44,18 +45,21 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public NotificationResponseDTO getNotificationById(UUID notificationId) {
-        return notificationRepository.findById(notificationId)
+    public NotificationResponseDTO getNotificationById(UUID userId, UUID notificationId) {
+        return notificationRepository.findByIdAndUserId(notificationId, userId)
                 .map(notificationMapper::toDTO)
-                .orElseThrow(() -> new RuntimeException("Notification not found with id: " + notificationId));
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
     }
 
     @Transactional
-    public void markNotificationAsRead(UUID notificationId) {
-        notificationRepository.findById(notificationId).ifPresent(notification -> {
+    public void markNotificationAsRead(UUID userId, UUID notificationId) {
+        Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + notificationId));
+
+        if (!notification.isRead()) {
             notification.setRead(true);
             notificationRepository.save(notification);
-        });
+        }
     }
 
     @Transactional
