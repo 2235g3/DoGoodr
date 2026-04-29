@@ -68,6 +68,9 @@ public class Opportunity {
     @Column(name = "recurring")
     private Boolean recurring;
 
+    @Column(length = 255)
+    private String availability;
+
     @Min(value = 1, message = "Required hours must be at least 1")
     @Column(name = "required_hours")
     private Integer requiredHours;

@@ -29,6 +29,7 @@ public class OpportunityMapper {
         opportunity.setStartDate(dto.getStartDate());
         opportunity.setEndDate(dto.getEndDate());
         opportunity.setRecurring(dto.getRecurring());
+        opportunity.setAvailability(dto.getAvailability());
         opportunity.setRequiredHours(dto.getRequiredHours());
         opportunity.setCapacity(dto.getCapacity());
         return opportunity;
@@ -48,6 +49,7 @@ public class OpportunityMapper {
         dto.setStartDate(opportunity.getStartDate());
         dto.setEndDate(opportunity.getEndDate());
         dto.setRecurring(opportunity.getRecurring());
+        dto.setAvailability(opportunity.getAvailability());
         dto.setRequiredHours(opportunity.getRequiredHours());
         dto.setCapacity(opportunity.getCapacity());
         dto.setDateCreated(opportunity.getDateCreated());
@@ -91,6 +93,9 @@ public class OpportunityMapper {
         }
         if (dto.getRecurring() != null) {
             opportunity.setRecurring(dto.getRecurring());
+        }
+        if (dto.getAvailability() != null) {
+            opportunity.setAvailability(dto.getAvailability());
         }
         if (dto.getRequiredHours() != null) {
             opportunity.setRequiredHours(dto.getRequiredHours());

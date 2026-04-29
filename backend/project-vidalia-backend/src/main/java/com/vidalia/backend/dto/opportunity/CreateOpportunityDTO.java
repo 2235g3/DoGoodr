@@ -40,6 +40,9 @@ public class CreateOpportunityDTO {
     private LocalDate endDate;
     private Boolean recurring;
 
+    @Size(max = 255, message = "Availability cannot exceed 255 characters")
+    private String availability;
+
     @Min(value = 0, message = "Required hours cannot be negative")
     private Integer requiredHours;
 
@@ -48,4 +51,3 @@ public class CreateOpportunityDTO {
 
     private OpportunityStatus status;
 }
-
