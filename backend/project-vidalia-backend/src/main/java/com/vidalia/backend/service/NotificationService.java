@@ -9,6 +9,7 @@ import com.vidalia.backend.repository.NotificationRepository;
 import com.vidalia.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +24,8 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
-    private final NotificationPushService notificationPushService;
+    private static final String NOTIFICATION_QUEUE_DESTINATION = "/queue/notifications";
+    private final SimpMessagingTemplate messagingTemplate;
 
     private final UserRepository userRepository;
 
@@ -64,8 +66,12 @@ public class NotificationService {
         Notification notification = notificationMapper.toEntity(dto, user);
         Notification savedNotification = notificationRepository.save(notification);
         NotificationResponseDTO response = notificationMapper.toDTO(savedNotification);
-        notificationPushService.sendToUser(user.getId(), response);
+        pushToUser(user.getId(), response);
         return response;
 
+    }
+
+    private void pushToUser(UUID userId, NotificationResponseDTO notification) {
+        messagingTemplate.convertAndSendToUser(userId.toString(), NOTIFICATION_QUEUE_DESTINATION, notification);
     }
 }
