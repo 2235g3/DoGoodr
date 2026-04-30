@@ -54,6 +54,25 @@ export function clearAuthSession() {
   localStorage.removeItem(USER_KEY)
 }
 
+export function getAccessToken() {
+  return localStorage.getItem(ACCESS_TOKEN_KEY)
+}
+
+export function getStoredUser() {
+  const rawUser = localStorage.getItem(USER_KEY)
+
+  if (!rawUser) {
+    return null
+  }
+
+  try {
+    return JSON.parse(rawUser) as UserResponseDTO
+  } catch {
+    clearAuthSession()
+    return null
+  }
+}
+
 export function getPostLoginPath(role: UserResponseDTO['role']) {
   switch (role) {
     case 'VOLUNTEER':
