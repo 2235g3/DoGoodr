@@ -1,5 +1,11 @@
 import { apiRequest } from './client'
-import type { AuthResponse, LoginRequest, UserResponseDTO } from './types'
+import type {
+  AuthResponse,
+  LoginRequest,
+  OrganisationRegisterRequest,
+  UserResponseDTO,
+  VolunteerRegisterRequest,
+} from './types'
 
 const ACCESS_TOKEN_KEY = 'dogoodr.accessToken'
 const REFRESH_TOKEN_KEY = 'dogoodr.refreshToken'
@@ -7,6 +13,20 @@ const USER_KEY = 'dogoodr.user'
 
 export async function login(request: LoginRequest) {
   return apiRequest<AuthResponse>('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  })
+}
+
+export async function registerVolunteer(request: VolunteerRegisterRequest) {
+  return apiRequest<AuthResponse>('/api/auth/register/volunteer', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  })
+}
+
+export async function registerOrganisation(request: OrganisationRegisterRequest) {
+  return apiRequest<AuthResponse>('/api/auth/register/organisation', {
     method: 'POST',
     body: JSON.stringify(request),
   })

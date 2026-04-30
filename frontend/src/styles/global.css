@@ -40,7 +40,8 @@ a {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -382,7 +383,8 @@ h2 {
   font-weight: 800;
 }
 
-.auth-card input {
+.auth-card input,
+.auth-card select {
   min-height: 54px;
   width: 100%;
   border: 1px solid var(--line);
@@ -390,6 +392,25 @@ h2 {
   padding: 0 16px;
   color: var(--ink);
   background: var(--paper);
+}
+
+.auth-card select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 22px) 23px,
+    calc(100% - 16px) 23px;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
 .form-note {
@@ -421,6 +442,43 @@ h2 {
   background:
     linear-gradient(90deg, rgba(154, 189, 121, 0.24) 0 50%, rgba(47, 36, 79, 0.08) 50% 100%),
     var(--paper);
+}
+
+.signup-page {
+  background:
+    radial-gradient(circle at 78% 20%, rgba(154, 189, 121, 0.2), transparent 30%),
+    linear-gradient(130deg, #fbfaf6 0%, #f4efe5 58%, #e9f0df 100%);
+}
+
+.signup-page--organisation {
+  background:
+    radial-gradient(circle at 84% 16%, rgba(47, 36, 79, 0.16), transparent 32%),
+    linear-gradient(130deg, #fbfaf6 0%, #eef2e7 55%, #e6ece1 100%);
+}
+
+.signup-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 520px);
+  align-items: center;
+  gap: 48px;
+  max-width: 1120px;
+  min-height: calc(100svh - 116px);
+  margin: 0 auto;
+}
+
+.signup-intro h1 {
+  font-size: clamp(2.7rem, 6vw, 5.3rem);
+}
+
+.signup-intro p {
+  max-width: 560px;
+  color: var(--ink-soft);
+  font-size: 1.14rem;
+  line-height: 1.65;
+}
+
+.signup-card {
+  gap: 16px;
 }
 
 .choice-intro {
@@ -516,7 +574,8 @@ h2 {
   }
 
   .home-hero,
-  .auth-shell {
+  .auth-shell,
+  .signup-shell {
     grid-template-columns: 1fr;
     min-height: auto;
     padding-top: 38px;
@@ -586,5 +645,9 @@ h2 {
   .auth-card,
   .placeholder-card {
     padding: 22px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 }
