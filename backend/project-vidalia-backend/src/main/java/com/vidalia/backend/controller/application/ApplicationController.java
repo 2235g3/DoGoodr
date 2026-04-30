@@ -8,12 +8,12 @@ import com.vidalia.backend.security.CustomUserDetails;
 import com.vidalia.backend.service.ApplicationService;
 import com.vidalia.backend.service.OrganisationProfileService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,14 +43,14 @@ public class ApplicationController {
 		return ResponseEntity.ok(applicationService.getApplicationById(id));
 	}
 
-	@GetMapping("/admin/{opportunityId}")
+	@GetMapping("/admin/opportunity/{opportunityId}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<ApplicationResponseDTO>> getApplicationsByOpportunity(
 			@PathVariable UUID opportunityId) {
 		return ResponseEntity.ok(applicationService.getAllApplicationsForOpportunity(opportunityId));
 	}
 
-	@GetMapping("/volunteer/{volunteerId}")
+	@GetMapping("/admin/volunteer/{volunteerId}")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<ApplicationResponseDTO>> getApplicationsByVolunteer(@PathVariable UUID volunteerId) {
 		return ResponseEntity.ok(applicationService.getAllApplicationsForVolunteer(volunteerId));
@@ -64,14 +64,16 @@ public class ApplicationController {
 		return ResponseEntity.ok(applicationService.getAllApplicationsForVolunteer(userDetails.getId()));
 	}
 
-	@PostMapping("/me")
+	@PostMapping("/me/{opportunityId}")
 	@PreAuthorize("hasRole('VOLUNTEER')")
-	public ResponseEntity<Void> createApplication(
+	public ResponseEntity<ApplicationResponseDTO> createApplication(
 			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@PathVariable UUID opportunityId,
 			@Valid @RequestBody CreateApplicationDTO createApplicationDTO) {
 		UUID volunteerId = userDetails.getId();
-		ApplicationResponseDTO created = applicationService.createApplication(createApplicationDTO, volunteerId);
-		return ResponseEntity.created(URI.create("/api/applications/" + created.getId())).build();
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				applicationService.createApplication(createApplicationDTO, volunteerId, opportunityId));
 	}
 
 

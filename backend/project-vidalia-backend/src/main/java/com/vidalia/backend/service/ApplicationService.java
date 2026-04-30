@@ -7,6 +7,7 @@ import com.vidalia.backend.exceptions.ForbiddenRequestException;
 import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.ApplicationMapper;
 import com.vidalia.backend.model.*;
+import com.vidalia.backend.model.OpportunityStatus;
 import com.vidalia.backend.repository.ApplicationRepository;
 import com.vidalia.backend.repository.OpportunityRepository;
 import com.vidalia.backend.repository.VolunteerProfileRepository;
@@ -85,13 +86,13 @@ public class ApplicationService {
     }
 
     @Transactional
-    public ApplicationResponseDTO createApplication(CreateApplicationDTO createApplicationDTO, UUID volunteerId) {
-        Opportunity opportunity = opportunityRepository.findById(createApplicationDTO.getOpportunityId())
-                .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + createApplicationDTO.getOpportunityId()));
+    public ApplicationResponseDTO createApplication(CreateApplicationDTO createApplicationDTO, UUID volunteerId, UUID opportunityId) {
+        Opportunity opportunity = opportunityRepository.findById(opportunityId)
+                .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + opportunityId));
 
         // If the opportunity is not open, throw an exception
-        if (!opportunity.getStatus().equals("OPEN")) {
-            throw new ForbiddenRequestException("Cannot apply to opportunity with id: " + createApplicationDTO.getOpportunityId() + " because it is not open for applications");
+        if (opportunity.getStatus() != OpportunityStatus.OPEN) {
+            throw new ForbiddenRequestException("Cannot apply to opportunity with id: " + opportunityId + " because it is not open for applications");
         }
 
         // Get volunteer profile
