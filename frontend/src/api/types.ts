@@ -44,6 +44,103 @@ export type UserResponseDTO = {
   createdAt: string
 }
 
+export type CreateUserDTO = {
+  email: string
+  password: string
+  role: Role
+}
+
+export type UpdateUserDTO = {
+  email?: string | null
+  secondaryEmail?: string | null
+  phoneNumber?: string | null
+}
+
+export type UpdateUserPasswordDTO = {
+  oldPassword: string
+  newPassword: string
+}
+
+export type VolunteerProfileDTO = {
+  id: string
+  forename: string
+  surname?: string | null
+  preferredName: string
+  profilePictureUrl?: string | null
+  cvUrl?: string | null
+  contactEmail?: string | null
+  location?: string | null
+  profileDescription?: string | null
+  longitude?: number | null
+  latitude?: number | null
+  maxTravelDistance?: number | null
+  remoteOnly: boolean
+  totalHours?: number | null
+  availability?: string | null
+  dateOfBirth: string
+  lastUpdated: string
+  pointsBalance?: number | null
+}
+
+export type OrganisationProfileDTO = {
+  id: string
+  displayName: string
+  profilePictureUrl?: string | null
+  description?: string | null
+  contactEmail?: string | null
+  location?: string | null
+  websiteUrl?: string | null
+}
+
+export type OpportunityStatus = 'OPEN' | 'CLOSED'
+
+export type OpportunityDTO = {
+  id: string
+  title: string
+  description: string
+  location?: string | null
+  longitude?: number | null
+  latitude?: number | null
+  remote: boolean
+  status: OpportunityStatus
+  minAge?: number | null
+  startDate: string
+  endDate?: string | null
+  recurring?: boolean | null
+  availability?: string | null
+  requiredHours?: number | null
+  capacity?: number | null
+  dateCreated: string
+  lastUpdated: string
+  organisationProfile: OrganisationProfileDTO
+}
+
+export type ApplicationDTO = {
+  id: string
+  volunteerId: string
+  volunteerName: string
+  opportunityId: string
+  opportunityName: string
+  message: string
+  status: string
+  dateApplied: string
+  decisionDate?: string | null
+}
+
+export type VolunteerHistoryDTO = {
+  volunteerId: string
+  volunteerName: string
+  opportunityId: string
+  opportunityTitle: string
+  organisationId: string
+  organisationName: string
+  hoursLogged: number
+  startDate: string
+  endDate: string
+  pointsGained: number
+  organisationComment?: string | null
+}
+
 export type ErrorResponse = {
   timestamp?: string
   status?: number
