@@ -125,7 +125,7 @@ public class ApplicationService {
 
     private void sendApplicationNotificationToOrganisation(ApplicationResponseDTO applicationDTO, UUID organisationId) {
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setUserId(organisationId);
+        notificationDTO.setRecipientId(organisationId);
         notificationDTO.setType(NotificationType.APPLICATION_RECEIVED);
         notificationDTO.setMessage("New application received for opportunity: " + applicationDTO.getOpportunityName());
         notificationService.createNotification(notificationDTO);
@@ -133,7 +133,7 @@ public class ApplicationService {
 
     private void sendApplicationStatusChangeNotificationToVolunteer(ApplicationResponseDTO applicationDTO) {
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setUserId(applicationDTO.getVolunteerId());
+        notificationDTO.setRecipientId(applicationDTO.getVolunteerId());
         notificationDTO.setType(NotificationType.DECISION_RECEIVED);
         notificationDTO.setMessage("The status of your application for opportunity: " + applicationDTO.getOpportunityName() + " has been updated.");
         notificationService.createNotification(notificationDTO);

@@ -64,8 +64,8 @@ public class NotificationService {
 
     @Transactional
     public NotificationResponseDTO createNotification(CreateNotificationDTO dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getUserId()));
+        User user = userRepository.findById(dto.getRecipientId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + dto.getRecipientId()));
 
         Notification notification = notificationMapper.toEntity(dto, user);
         Notification savedNotification = notificationRepository.save(notification);

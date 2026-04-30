@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 public class CreateNotificationDTO {
     @NotNull(message = "User id cannot be null")
-    private UUID userId;
+    private UUID recipientId;
 
     @NotNull(message = "Notification type cannot be null")
     private NotificationType type;

@@ -43,7 +43,7 @@ class NotificationServiceTest {
         UUID userId = UUID.randomUUID();
 
         CreateNotificationDTO createDto = new CreateNotificationDTO();
-        createDto.setUserId(userId);
+        createDto.setRecipientId(userId);
         createDto.setType(NotificationType.APPLICATION_RECEIVED);
         createDto.setMessage("New application received");
 

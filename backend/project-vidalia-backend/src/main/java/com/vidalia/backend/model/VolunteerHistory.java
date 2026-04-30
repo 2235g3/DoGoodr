@@ -48,7 +48,7 @@ public class VolunteerHistory {
 
     @NotNull
     @Column(name = "points_gained", nullable = false)
-    private int pointsGained;
+    private int pointsEarned;
 
     @NotNull
     @Column(name = "organisation_comment")
