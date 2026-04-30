@@ -60,7 +60,7 @@ class NotificationControllerSecurityTest {
         CustomUserDetails volunteer = customUserDetails(Role.VOLUNTEER);
 
         CreateNotificationDTO createDto = new CreateNotificationDTO();
-        createDto.setUserId(UUID.randomUUID());
+        createDto.setRecipientId(UUID.randomUUID());
         createDto.setType(NotificationType.APPLICATION_RECEIVED);
         createDto.setMessage("Test notification");
 
@@ -76,7 +76,7 @@ class NotificationControllerSecurityTest {
         CustomUserDetails admin = customUserDetails(Role.ADMIN);
 
         CreateNotificationDTO createDto = new CreateNotificationDTO();
-        createDto.setUserId(UUID.randomUUID());
+        createDto.setRecipientId(UUID.randomUUID());
         createDto.setType(NotificationType.APPLICATION_RECEIVED);
         createDto.setMessage("Test notification");
 

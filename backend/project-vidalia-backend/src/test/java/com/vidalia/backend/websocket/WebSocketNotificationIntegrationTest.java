@@ -98,7 +98,7 @@ class WebSocketNotificationIntegrationTest {
             });
 
             CreateNotificationDTO createDto = new CreateNotificationDTO();
-            createDto.setUserId(user.getId());
+            createDto.setRecipientId(user.getId());
             createDto.setType(NotificationType.APPLICATION_RECEIVED);
             createDto.setMessage("Real websocket notification test");
 
