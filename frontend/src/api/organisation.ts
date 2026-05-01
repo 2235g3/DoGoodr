@@ -51,6 +51,14 @@ export function uploadOrganisationProfilePicture(token: string, file: File) {
   )
 }
 
+export function deleteOrganisationProfilePicture(token: string) {
+  return apiRequest<OProfileResponseDTO>(
+    '/api/organisation-profile/me/profile-picture',
+    { method: 'DELETE' },
+    { token },
+  )
+}
+
 export function getOrganisationOpportunities(token: string, organisationId: string) {
   return apiRequest<OpportunityResponseDTO[]>(
     `/api/opportunities/organisation/${organisationId}`,

@@ -1,11 +1,12 @@
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom'
-import { ApiError } from '../api/client'
+import { API_BASE_URL, ApiError } from '../api/client'
 import { clearAuthSession, getAccessToken, getStoredUser } from '../api/auth'
 import {
   addVolunteerHistoryHours,
   createOpportunity,
   createVolunteerHistory,
+  deleteOrganisationProfilePicture,
   deleteOpportunity,
   getNotifications,
   getOpportunity,
@@ -106,6 +107,14 @@ function cleanPayload(payload: CreateOpportunityDTO) {
   return Object.fromEntries(
     Object.entries(payload).filter(([, value]) => value !== '' && value !== null),
   ) as CreateOpportunityDTO
+}
+
+function resolveMediaUrl(value: string) {
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value
+  }
+
+  return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`
 }
 
 function EmptyState({ children }: { children: ReactNode }) {
@@ -416,6 +425,22 @@ export function OrganisationProfilePage() {
     }
   }
 
+  async function handleDeleteProfilePicture() {
+    if (!token) {
+      return
+    }
+
+    try {
+      setError('')
+      setSuccess('')
+      const updated = await deleteOrganisationProfilePicture(token)
+      setProfile(updated)
+      setSuccess('Profile picture removed.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    }
+  }
+
   return (
     <OrganisationShell eyebrow="Profile" title="Organisation profile">
       {state === 'loading' ? <EmptyState>Loading profile...</EmptyState> : null}
@@ -502,12 +527,19 @@ export function OrganisationProfilePage() {
             </div>
             <h2>Profile picture</h2>
             {profile?.profilePictureUrl ? (
-              <img className="org-avatar-preview" src={profile.profilePictureUrl} alt="" />
+              <img
+                className="org-avatar-preview"
+                src={resolveMediaUrl(profile.profilePictureUrl)}
+                alt=""
+              />
             ) : null}
             <label className="org-upload">
               Upload image
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} />
             </label>
+            <button className="button button--secondary" type="button" onClick={handleDeleteProfilePicture}>
+              Remove image
+            </button>
           </aside>
         </section>
       ) : null}
