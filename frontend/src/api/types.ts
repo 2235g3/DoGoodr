@@ -106,7 +106,10 @@ export type UpdateVolunteerProfileDTO = {
   contactEmail?: string | null
   location?: string | null
   profileDescription?: string | null
+  longitude?: number | null
+  latitude?: number | null
   maxTravelDistance?: number | null
+  remoteOnly?: boolean | null
   availability?: string | null
 }
 

@@ -18,7 +18,10 @@ type ProfileForm = {
   contactEmail: string
   location: string
   profileDescription: string
+  longitude: string
+  latitude: string
   maxTravelDistance: string
+  remoteOnly: boolean
   availability: string
 }
 
@@ -55,7 +58,10 @@ export function VolunteerProfilePage() {
         contactEmail: form.contactEmail || null,
         location: form.location || null,
         profileDescription: form.profileDescription || null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+        latitude: form.latitude ? Number(form.latitude) : null,
         maxTravelDistance: form.maxTravelDistance ? Number(form.maxTravelDistance) : null,
+        remoteOnly: form.remoteOnly,
         availability: form.availability || null,
       })
       setProfile(nextProfile)
@@ -95,7 +101,7 @@ export function VolunteerProfilePage() {
     }
   }
 
-  function updateField(field: keyof ProfileForm, value: string) {
+  function updateField<TField extends keyof ProfileForm>(field: TField, value: ProfileForm[TField]) {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
@@ -140,6 +146,26 @@ export function VolunteerProfilePage() {
             Location
             <input value={form.location} onChange={(event) => updateField('location', event.target.value)} />
           </label>
+          <div className="admin-grid-two">
+            <label>
+              Longitude
+              <input
+                step="any"
+                type="number"
+                value={form.longitude}
+                onChange={(event) => updateField('longitude', event.target.value)}
+              />
+            </label>
+            <label>
+              Latitude
+              <input
+                step="any"
+                type="number"
+                value={form.latitude}
+                onChange={(event) => updateField('latitude', event.target.value)}
+              />
+            </label>
+          </div>
           <label>
             Max travel distance
             <input
@@ -148,6 +174,14 @@ export function VolunteerProfilePage() {
               value={form.maxTravelDistance}
               onChange={(event) => updateField('maxTravelDistance', event.target.value)}
             />
+          </label>
+          <label className="volunteer-toggle">
+            <input
+              checked={form.remoteOnly}
+              type="checkbox"
+              onChange={(event) => updateField('remoteOnly', event.target.checked)}
+            />
+            Remote only
           </label>
           <label>
             Availability
@@ -260,7 +294,10 @@ const emptyForm: ProfileForm = {
   contactEmail: '',
   location: '',
   profileDescription: '',
+  longitude: '',
+  latitude: '',
   maxTravelDistance: '',
+  remoteOnly: false,
   availability: '',
 }
 
@@ -272,7 +309,10 @@ function makeForm(profile: VolunteerProfileDTO): ProfileForm {
     contactEmail: profile.contactEmail ?? '',
     location: profile.location ?? '',
     profileDescription: profile.profileDescription ?? '',
+    longitude: profile.longitude?.toString() ?? '',
+    latitude: profile.latitude?.toString() ?? '',
     maxTravelDistance: profile.maxTravelDistance?.toString() ?? '',
+    remoteOnly: profile.remoteOnly,
     availability: profile.availability ?? '',
   }
 }

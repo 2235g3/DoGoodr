@@ -66,8 +66,17 @@ public class VolunteerProfileMapper {
         if (dto.getProfileDescription() != null) {
             profile.setProfileDescription(dto.getProfileDescription());
         }
+        if (dto.getLongitude() != null) {
+            profile.setLongitude(dto.getLongitude());
+        }
+        if (dto.getLatitude() != null) {
+            profile.setLatitude(dto.getLatitude());
+        }
         if (dto.getMaxTravelDistance() != null) {
             profile.setMaxTravelDistance(dto.getMaxTravelDistance());
+        }
+        if (dto.getRemoteOnly() != null) {
+            profile.setRemoteOnly(dto.getRemoteOnly());
         }
         if (dto.getAvailability() != null) {
             profile.setAvailability(dto.getAvailability());
