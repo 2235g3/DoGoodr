@@ -4,8 +4,9 @@ import { BrandHeader } from './BrandHeader'
 
 const volunteerLinks = [
   { to: '/volunteer', label: 'Dashboard', end: true },
+  { to: '/volunteer/onboarding', label: 'Onboarding' },
   { to: '/volunteer/profile', label: 'Profile' },
-  { to: '/volunteer/matches', label: 'Matches' },
+  { to: '/volunteer/matches', label: 'Browse' },
   { to: '/volunteer/applications', label: 'Applications' },
   { to: '/volunteer/notifications', label: 'Notifications' },
   { to: '/volunteer/history', label: 'History' },

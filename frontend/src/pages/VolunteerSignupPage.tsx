@@ -36,7 +36,9 @@ export function VolunteerSignupPage() {
       })
       const user = await getCurrentUser(tokens.accessToken)
       storeAuthSession(tokens, user)
-      navigate(getPostLoginPath(user.role), { replace: true })
+      navigate(user.role === 'VOLUNTEER' ? '/volunteer/onboarding?firstRun=1' : getPostLoginPath(user.role), {
+        replace: true,
+      })
     } catch (caughtError) {
       if (caughtError instanceof ApiError) {
         setError(caughtError.message)

@@ -2,10 +2,14 @@ import { apiRequest } from './client'
 import { getStoredAccessToken } from './auth'
 import type {
   ApplicationDTO,
+  AssignedLabelDTO,
   CreateApplicationDTO,
+  LabelDTO,
   MatchedOpportunityDTO,
   NotificationDTO,
   OpportunityDTO,
+  OpportunitySearchParams,
+  OrganisationProfileDTO,
   UpdateUserDTO,
   UpdateUserPasswordDTO,
   UpdateVolunteerProfileDTO,
@@ -99,10 +103,61 @@ export function getOpenVolunteerOpportunities() {
   return apiRequest<OpportunityDTO[]>('/api/opportunities/open', {}, { token: volunteerToken() })
 }
 
+export function searchVolunteerOpportunities(params: OpportunitySearchParams = {}) {
+  const searchParams = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.set(key, String(value))
+    }
+  })
+
+  const query = searchParams.toString()
+  return apiRequest<OpportunityDTO[]>(
+    `/api/opportunities/search${query ? `?${query}` : ''}`,
+    {},
+    { token: volunteerToken() },
+  )
+}
+
 export function getVolunteerOpportunitiesByOrganisation(organisationId: string) {
   return apiRequest<OpportunityDTO[]>(
     `/api/opportunities/organisation/${organisationId}`,
     {},
+    { token: volunteerToken() },
+  )
+}
+
+export function getVolunteerOrganisations() {
+  return apiRequest<OrganisationProfileDTO[]>(
+    '/api/organisation-profile',
+    {},
+    { token: volunteerToken() },
+  )
+}
+
+export function getVolunteerOrganisation(organisationId: string) {
+  return apiRequest<OrganisationProfileDTO>(
+    `/api/organisation-profile/${organisationId}`,
+    {},
+    { token: volunteerToken() },
+  )
+}
+
+export function getLabels() {
+  return apiRequest<LabelDTO[]>('/api/labels', {}, { token: volunteerToken() })
+}
+
+export function getMyVolunteerLabels() {
+  return apiRequest<AssignedLabelDTO[]>('/api/labels/volunteer/me', {}, { token: volunteerToken() })
+}
+
+export function setMyVolunteerLabels(labels: AssignedLabelDTO[]) {
+  return apiRequest<AssignedLabelDTO[]>(
+    '/api/labels/volunteer/me',
+    {
+      method: 'PUT',
+      body: JSON.stringify(labels),
+    },
     { token: volunteerToken() },
   )
 }

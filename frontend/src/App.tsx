@@ -27,6 +27,7 @@ import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard'
 import { VolunteerHistoryPage } from './pages/volunteer/VolunteerHistoryPage'
 import { VolunteerMatchesPage } from './pages/volunteer/VolunteerMatchesPage'
 import { VolunteerNotificationsPage } from './pages/volunteer/VolunteerNotificationsPage'
+import { VolunteerOnboardingPage } from './pages/volunteer/VolunteerOnboardingPage'
 import { VolunteerProfilePage } from './pages/volunteer/VolunteerProfilePage'
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
 
       <Route path="/volunteer" element={<VolunteerLayout />}>
         <Route index element={<VolunteerDashboard />} />
+        <Route path="onboarding" element={<VolunteerOnboardingPage />} />
         <Route path="profile" element={<VolunteerProfilePage />} />
         <Route path="matches" element={<VolunteerMatchesPage />} />
         <Route path="applications" element={<VolunteerApplicationsPage />} />

@@ -25,6 +25,8 @@ export type NotificationType =
   | 'VOLUNTEERING_HISTORY_UPDATED'
   | 'POINTS_EARNED'
 
+export type LabelType = 'SKILL' | 'INTEREST' | 'CAUSE' | 'LANGUAGE' | 'EDUCATION' | 'OTHER'
+
 export type AuthResponse = {
   accessToken: string
   refreshToken: string
@@ -159,6 +161,21 @@ export type OpportunityDTO = {
 
 export type OpportunityResponseDTO = OpportunityDTO
 
+export type OpportunitySearchSort = 'newest' | 'start-date' | 'closest' | 'hours' | 'organisation'
+
+export type OpportunitySearchParams = {
+  q?: string
+  remote?: boolean
+  organisationId?: string
+  maxHours?: number
+  startsAfter?: string
+  startsBefore?: string
+  latitude?: number
+  longitude?: number
+  maxDistanceKm?: number
+  sort?: OpportunitySearchSort
+}
+
 export type CreateOpportunityDTO = {
   title: string
   description: string
@@ -201,6 +218,19 @@ export type MatchedOpportunityDTO = {
   finalScore: number
   normalizedScore?: number | null
   distanceKm?: number | null
+}
+
+export type LabelDTO = {
+  id: number
+  name: string
+  semanticTag?: string | null
+  required: boolean
+  type: LabelType
+}
+
+export type AssignedLabelDTO = {
+  labelId: number
+  weight: number
 }
 
 export type NotificationDTO = {
