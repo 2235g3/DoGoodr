@@ -8,13 +8,11 @@ import {
   createVolunteerHistory,
   deleteOrganisationProfilePicture,
   deleteOpportunity,
-  getNotifications,
   getOpportunity,
   getOpportunityHistory,
   getOrganisationApplications,
   getOrganisationOpportunities,
   getOrganisationProfile,
-  markNotificationRead,
   updateApplicationStatus,
   updateOpportunity,
   updateOrganisationProfile,
@@ -27,13 +25,13 @@ import type {
   ApplicationResponseDTO,
   ApplicationStatus,
   CreateOpportunityDTO,
-  NotificationResponseDTO,
   OProfileResponseDTO,
   OpportunityResponseDTO,
   OpportunityStatus,
   UpdateOrganisationProfileDTO,
   VolunteerHistoryResponseDTO,
 } from '../api/types'
+import { useNotifications } from '../notifications/NotificationContext'
 import '../styles/organisation.css'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error'
@@ -142,6 +140,7 @@ function OrganisationShell({
 }) {
   const navigate = useNavigate()
   const { token, user, isOrganisation } = useOrganisationAuth()
+  const { unreadCount } = useNotifications()
 
   function handleLogout() {
     clearAuthSession()
@@ -192,7 +191,10 @@ function OrganisationShell({
           <NavLink to="/organisation/opportunities">Opportunities</NavLink>
           <NavLink to="/organisation/applications">Applications</NavLink>
           <NavLink to="/organisation/history">Volunteer history</NavLink>
-          <NavLink to="/organisation/notifications">Notifications</NavLink>
+          <NavLink to="/organisation/notifications">
+            <span className="notification-nav-label">Notifications</span>
+            {unreadCount > 0 ? <span className="notification-badge">{unreadCount}</span> : null}
+          </NavLink>
         </nav>
         <button className="org-logout" type="button" onClick={handleLogout}>
           Logout
@@ -215,12 +217,12 @@ function OrganisationShell({
 
 export function OrganisationDashboardPage() {
   const { token } = useOrganisationAuth()
+  const { unreadCount } = useNotifications()
   const [state, setState] = useState<LoadState>('loading')
   const [error, setError] = useState('')
   const [profile, setProfile] = useState<OProfileResponseDTO | null>(null)
   const [opportunities, setOpportunities] = useState<OpportunityResponseDTO[]>([])
   const [applications, setApplications] = useState<ApplicationResponseDTO[]>([])
-  const [notifications, setNotifications] = useState<NotificationResponseDTO[]>([])
 
   useEffect(() => {
     if (!token) {
@@ -232,16 +234,14 @@ export function OrganisationDashboardPage() {
       try {
         setState('loading')
         const nextProfile = await getOrganisationProfile(accessToken)
-        const [nextOpportunities, nextApplications, nextNotifications] = await Promise.all([
+        const [nextOpportunities, nextApplications] = await Promise.all([
           getOrganisationOpportunities(accessToken, nextProfile.id),
           getOrganisationApplications(accessToken),
-          getNotifications(accessToken),
         ])
 
         setProfile(nextProfile)
         setOpportunities(nextOpportunities)
         setApplications(nextApplications)
-        setNotifications(nextNotifications)
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -256,7 +256,6 @@ export function OrganisationDashboardPage() {
   const pendingApplications = applications.filter((item) =>
     ['APPLIED', 'UNDER_REVIEW'].includes(item.status),
   ).length
-  const unreadNotifications = notifications.filter((item) => !item.read).length
 
   return (
     <OrganisationShell
@@ -286,7 +285,7 @@ export function OrganisationDashboardPage() {
               <p>Applications to review</p>
             </article>
             <article>
-              <span>{unreadNotifications}</span>
+              <span>{unreadCount}</span>
               <p>Unread notifications</p>
             </article>
           </section>
@@ -1348,20 +1347,24 @@ export function OrganisationHistoryPage() {
 
 export function OrganisationNotificationsPage() {
   const { token } = useOrganisationAuth()
-  const [state, setState] = useState<LoadState>('loading')
+  const {
+    notifications,
+    connectionState,
+    markRead,
+    refreshNotifications,
+  } = useNotifications()
+  const [state, setState] = useState<LoadState>('ready')
   const [error, setError] = useState('')
-  const [notifications, setNotifications] = useState<NotificationResponseDTO[]>([])
 
   useEffect(() => {
     if (!token) {
       return
     }
-    const accessToken = token
 
     async function loadNotifications() {
       try {
         setState('loading')
-        setNotifications(await getNotifications(accessToken))
+        await refreshNotifications()
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -1370,7 +1373,7 @@ export function OrganisationNotificationsPage() {
     }
 
     void loadNotifications()
-  }, [token])
+  }, [token, refreshNotifications])
 
   async function handleMarkRead(notificationId: string) {
     if (!token) {
@@ -1378,12 +1381,7 @@ export function OrganisationNotificationsPage() {
     }
 
     try {
-      await markNotificationRead(token, notificationId)
-      setNotifications((current) =>
-        current.map((notification) =>
-          notification.id === notificationId ? { ...notification, read: true } : notification,
-        ),
-      )
+      await markRead(notificationId)
     } catch (caughtError) {
       setError(getErrorMessage(caughtError))
     }
@@ -1391,6 +1389,7 @@ export function OrganisationNotificationsPage() {
 
   return (
     <OrganisationShell eyebrow="Notifications" title="Organisation updates">
+      <p className="org-small-note">Real-time connection: {connectionState}.</p>
       {state === 'loading' ? <EmptyState>Loading notifications...</EmptyState> : null}
       {state === 'error' ? <InlineError message={error} /> : null}
       {error && state === 'ready' ? <InlineError message={error} /> : null}

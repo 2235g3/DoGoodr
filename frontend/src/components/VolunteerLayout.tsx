@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { clearAuthSession, getStoredUser } from '../api/auth'
+import { useNotifications } from '../notifications/NotificationContext'
 import { BrandHeader } from './BrandHeader'
 
 const volunteerLinks = [
@@ -16,6 +17,7 @@ const volunteerLinks = [
 export function VolunteerLayout() {
   const navigate = useNavigate()
   const user = getStoredUser()
+  const { unreadCount } = useNotifications()
 
   function handleLogout() {
     clearAuthSession()
@@ -69,7 +71,10 @@ export function VolunteerLayout() {
                 end={link.end}
                 className={({ isActive }) => (isActive ? 'is-active' : undefined)}
               >
-                {link.label}
+                <span className="notification-nav-label">{link.label}</span>
+                {link.label === 'Notifications' && unreadCount > 0 ? (
+                  <span className="notification-badge">{unreadCount}</span>
+                ) : null}
               </NavLink>
             ))}
           </nav>

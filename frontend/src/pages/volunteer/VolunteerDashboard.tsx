@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  getUnreadVolunteerNotifications,
   getMyVolunteerLabels,
   getVolunteerApplications,
   getVolunteerHistory,
   getVolunteerMatches,
   getVolunteerProfile,
 } from '../../api/volunteer'
+import { useNotifications } from '../../notifications/NotificationContext'
 import { calculateVolunteerProfileCompletion, type VolunteerProfileCompletion } from '../../utils/volunteerProfile'
 import { VolunteerNotice } from './VolunteerNotice'
 
@@ -24,6 +24,7 @@ export function VolunteerDashboard() {
   const [completion, setCompletion] = useState<VolunteerProfileCompletion | null>(null)
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const { unreadCount } = useNotifications()
 
   useEffect(() => {
     let isMounted = true
@@ -33,10 +34,9 @@ export function VolunteerDashboard() {
       getVolunteerApplications(),
       getVolunteerHistory(),
       getVolunteerMatches().catch(() => []),
-      getUnreadVolunteerNotifications(),
       getMyVolunteerLabels(),
     ])
-      .then(([profile, applications, history, matches, unread, labels]) => {
+      .then(([profile, applications, history, matches, labels]) => {
         if (!isMounted) return
         setName(profile.preferredName || profile.forename)
         setCompletion(calculateVolunteerProfileCompletion(profile, labels))
@@ -47,7 +47,7 @@ export function VolunteerDashboard() {
             history.reduce((total, item) => total + item.hoursLogged, 0),
           applications: applications.length,
           matches: matches.length,
-          unread: unread.length,
+          unread: unreadCount,
         })
       })
       .catch((caughtError) => {
@@ -58,7 +58,7 @@ export function VolunteerDashboard() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [unreadCount])
 
   return (
     <>

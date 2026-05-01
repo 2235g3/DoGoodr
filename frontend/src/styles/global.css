@@ -661,6 +661,8 @@ h2 {
   min-height: 44px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   border-radius: 14px;
   padding: 0 14px;
   color: var(--ink-soft);
@@ -929,6 +931,83 @@ h2 {
   color: #743232;
   background: #fff1ed;
   border-color: rgba(135, 56, 56, 0.22);
+}
+
+.notification-nav-label {
+  min-width: 0;
+}
+
+.notification-badge {
+  min-width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  padding: 0 7px;
+  color: var(--white);
+  background: var(--grape);
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.notification-toast-stack {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 80;
+  display: grid;
+  gap: 10px;
+  width: min(390px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.notification-toast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  border: 1px solid rgba(154, 189, 121, 0.36);
+  border-left: 5px solid var(--sage);
+  border-radius: 18px;
+  padding: 14px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 20px 60px rgba(47, 36, 79, 0.14);
+  pointer-events: auto;
+}
+
+.notification-toast span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--sage-deep);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.notification-toast p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.notification-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-toast-actions a,
+.notification-toast-actions button {
+  min-height: 34px;
+  border: 1px solid rgba(47, 36, 79, 0.12);
+  border-radius: 10px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: rgba(251, 250, 246, 0.82);
+  cursor: pointer;
+  font-weight: 900;
 }
 
 .taxonomy-stat-grid {
