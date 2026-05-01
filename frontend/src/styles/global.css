@@ -110,6 +110,32 @@ input:focus-visible {
   box-shadow: 0 8px 24px rgba(47, 36, 79, 0.08);
 }
 
+.workspace-header-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workspace-header-meta span,
+.workspace-header-meta a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.workspace-header-meta a {
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(47, 36, 79, 0.08);
+}
+
 .home-page {
   background:
     radial-gradient(circle at 78% 16%, rgba(154, 189, 121, 0.3), transparent 28%),
@@ -747,6 +773,15 @@ h2 {
   gap: 12px;
 }
 
+.admin-find-users-panel {
+  align-content: start;
+  gap: 10px;
+}
+
+.admin-find-users-panel h3 {
+  margin-bottom: 2px;
+}
+
 .admin-form input,
 .admin-form select,
 .admin-form textarea,
@@ -905,12 +940,14 @@ h2 {
   line-height: 1.55;
 }
 
-.admin-row-actions .taxonomy-action-button,
-.taxonomy-action-button {
-  justify-content: center;
-  min-width: 142px;
-  border-radius: 12px;
-  padding-inline: 18px;
+.admin-row-actions .taxonomy-action-button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 20px;
+  color: var(--white);
+  background: var(--ink);
+  box-shadow: 0 16px 36px rgba(47, 36, 79, 0.22);
 }
 
 .taxonomy-list {

@@ -48,7 +48,12 @@ export function VolunteerLayout() {
 
   return (
     <main className="volunteer-page">
-      <BrandHeader variant="panel" />
+      <BrandHeader variant="panel">
+        <div className="workspace-header-meta">
+          <span>Volunteer workspace</span>
+          <Link to="/volunteer/matches">Browse opportunities</Link>
+        </div>
+      </BrandHeader>
       <div className="admin-shell">
         <aside className="admin-sidebar volunteer-sidebar">
           <div>

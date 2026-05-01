@@ -1,10 +1,29 @@
 import { Link } from 'react-router-dom'
+import { getPostLoginPath, getStoredUser } from '../api/auth'
 import { BrandHeader } from '../components/BrandHeader'
 
 export function HomePage() {
+  const user = getStoredUser()
+  const dashboardPath = user ? getPostLoginPath(user.role) : null
+
   return (
     <main className="page home-page">
-      <BrandHeader />
+      <BrandHeader>
+        <nav className="public-nav" aria-label="Primary">
+          {dashboardPath ? (
+            <Link className="nav-pill" to={dashboardPath}>
+              To Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link to="/login">Login</Link>
+              <Link className="nav-pill" to="/get-started">
+                Get started
+              </Link>
+            </>
+          )}
+        </nav>
+      </BrandHeader>
 
       <section className="home-hero" aria-labelledby="home-title">
         <div className="hero-copy">
@@ -15,12 +34,20 @@ export function HomePage() {
             organisations a calmer way to coordinate the work that matters.
           </p>
           <div className="hero-actions">
-            <Link className="button button--primary" to="/get-started">
-              Get started
-            </Link>
-            <Link className="button button--secondary" to="/login">
-              Login
-            </Link>
+            {dashboardPath ? (
+              <Link className="button button--primary" to={dashboardPath}>
+                To Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link className="button button--primary" to="/get-started">
+                  Get started
+                </Link>
+                <Link className="button button--secondary" to="/login">
+                  Login
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
