@@ -1303,11 +1303,19 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  border-color: rgba(154, 189, 121, 0.36);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(243, 248, 237, 0.86));
 }
 
 .history-share-panel p {
+  max-width: 660px;
   color: var(--ink-soft);
   line-height: 1.55;
+}
+
+.history-share-panel h3 {
+  margin-bottom: 8px;
 }
 
 .volunteer-profile-card {

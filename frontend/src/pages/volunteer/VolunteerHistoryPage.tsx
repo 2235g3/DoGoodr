@@ -31,13 +31,23 @@ export function VolunteerHistoryPage() {
   }
 
   async function handleShareSummary() {
-    const shareText = `I have logged ${totals.hours} volunteering hours with ${totals.organisations} organisations through DoGoodr.`
+    const shareText = buildLinkedInSummaryText(history, totals)
     await shareTextValue(shareText, setMessage)
   }
 
   async function handleShareItem(item: VolunteerHistoryDTO) {
-    const shareText = `I volunteered ${item.hoursLogged} hours with ${item.organisationName} on ${item.opportunityTitle}.`
+    const shareText = buildLinkedInExperienceText(item)
     await shareTextValue(shareText, setMessage)
+  }
+
+  async function handleLinkedInExport(text: string) {
+    const linkedInWindow = window.open(makeLinkedInShareUrl(), '_blank', 'noopener,noreferrer')
+    await copyTextValue(text)
+    setMessage(
+      linkedInWindow
+        ? 'LinkedIn experience text copied. Paste it into the LinkedIn post composer to share your contribution.'
+        : 'LinkedIn experience text copied. Open LinkedIn and paste it into a post to share your contribution.',
+    )
   }
 
   return (
@@ -69,26 +79,24 @@ export function VolunteerHistoryPage() {
       <section className="admin-panel history-share-panel">
         <div>
           <p className="eyebrow">Share your impact</p>
-          <h3>Turn your volunteering record into an experience update.</h3>
+          <h3>Share your contributions to LinkedIn.</h3>
           <p>
-            Share a summary directly from your browser, or open a LinkedIn share intent with your
-            volunteering highlights.
+            Export a polished volunteering experience update. We copy the text first, then open
+            LinkedIn so you can review it before posting.
           </p>
         </div>
         <div className="admin-row-actions">
-          <button className="button button--primary" type="button" onClick={handleShareSummary}>
+          <button
+            className="button button--primary"
+            type="button"
+            onClick={() => handleLinkedInExport(buildLinkedInSummaryText(history, totals))}
+            disabled={history.length === 0}
+          >
+            Export to LinkedIn
+          </button>
+          <button className="button button--secondary" type="button" onClick={handleShareSummary}>
             Share summary
           </button>
-          <a
-            className="button button--secondary"
-            href={makeLinkedInShareUrl(
-              `I have logged ${totals.hours} volunteering hours with ${totals.organisations} organisations through DoGoodr.`,
-            )}
-            target="_blank"
-            rel="noreferrer"
-          >
-            LinkedIn
-          </a>
         </div>
       </section>
 
@@ -124,15 +132,12 @@ export function VolunteerHistoryPage() {
                     <button type="button" onClick={() => handleShareItem(item)}>
                       Share
                     </button>
-                    <a
-                      href={makeLinkedInShareUrl(
-                        `I volunteered ${item.hoursLogged} hours with ${item.organisationName} on ${item.opportunityTitle}.`,
-                      )}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => handleLinkedInExport(buildLinkedInExperienceText(item))}
                     >
                       LinkedIn
-                    </a>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -155,15 +160,53 @@ async function shareTextValue(text: string, onShared: (message: string) => void)
     return
   }
 
-  await navigator.clipboard.writeText(text)
+  await copyTextValue(text)
   onShared('Share text copied to clipboard.')
 }
 
-function makeLinkedInShareUrl(text: string) {
+async function copyTextValue(text: string) {
+  await navigator.clipboard.writeText(text)
+}
+
+function makeLinkedInShareUrl() {
   const url = new URL('https://www.linkedin.com/sharing/share-offsite/')
   url.searchParams.set('url', window.location.origin)
-  url.searchParams.set('summary', text)
   return url.toString()
+}
+
+function buildLinkedInSummaryText(
+  history: VolunteerHistoryDTO[],
+  totals: { hours: number; organisations: number; points: number },
+) {
+  const recentHighlights = history
+    .slice(0, 3)
+    .map((item) => `- ${item.opportunityTitle} with ${item.organisationName}: ${item.hoursLogged} hours`)
+    .join('\n')
+
+  return [
+    'I am proud to share my volunteering experience through DoGoodr.',
+    '',
+    `I have contributed ${totals.hours} hours across ${totals.organisations} organisation${totals.organisations === 1 ? '' : 's'}, earning ${totals.points} community impact points.`,
+    recentHighlights ? `\nRecent highlights:\n${recentHighlights}` : '',
+    '',
+    'Volunteering has helped me build practical experience, support meaningful community work, and keep showing up where help is needed.',
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+function buildLinkedInExperienceText(item: VolunteerHistoryDTO) {
+  return [
+    `I volunteered with ${item.organisationName} as part of "${item.opportunityTitle}".`,
+    '',
+    `Contribution: ${item.hoursLogged} hours`,
+    `Dates: ${formatDate(item.startDate)} to ${formatDate(item.endDate)}`,
+    item.organisationComment ? `Organisation note: ${item.organisationComment}` : '',
+    '',
+    'Grateful for the chance to contribute to meaningful community work through DoGoodr.',
+  ]
+    .filter(Boolean)
+    .join('\n')
 }
 
 function formatDate(value?: string | null) {
