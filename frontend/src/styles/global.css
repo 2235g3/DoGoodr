@@ -377,6 +377,69 @@ h2 {
   line-height: 1.6;
 }
 
+.home-matching {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+  gap: 28px;
+  align-items: stretch;
+  max-width: 1180px;
+  margin: 0 auto 28px;
+  border: 1px solid rgba(47, 36, 79, 0.12);
+  border-radius: var(--radius-lg);
+  padding: clamp(26px, 4vw, 42px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(243, 248, 237, 0.82));
+  box-shadow: 0 22px 60px rgba(47, 36, 79, 0.1);
+}
+
+.home-matching-copy h2 {
+  max-width: 620px;
+}
+
+.home-matching-copy p {
+  max-width: 650px;
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+  line-height: 1.68;
+}
+
+.matching-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.matching-flow article {
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid rgba(47, 36, 79, 0.1);
+  border-radius: 18px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.matching-flow span {
+  color: var(--sage-deep);
+  font-weight: 950;
+}
+
+.matching-flow strong {
+  display: block;
+  margin: 22px 0 10px;
+  color: var(--ink);
+  font-size: 1.22rem;
+  line-height: 1.08;
+}
+
+.matching-flow p {
+  margin-bottom: 0;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
 .auth-page,
 .placeholder-page {
   background:
@@ -1635,6 +1698,7 @@ h2 {
   }
 
   .home-hero,
+  .home-matching,
   .auth-shell,
   .signup-shell,
   .admin-shell {
@@ -1704,6 +1768,7 @@ h2 {
   }
 
   .home-strip,
+  .matching-flow,
   .choice-grid {
     grid-template-columns: 1fr;
   }

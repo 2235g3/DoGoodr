@@ -67,6 +67,40 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="home-matching" aria-labelledby="matching-title">
+        <div className="home-matching-copy">
+          <p className="eyebrow">Matching and recommendations</p>
+          <h2 id="matching-title">Removing the friction from volunteering work.</h2>
+          <p>
+            Volunteers tell DoGoodr what they care about, where they can travel, when they are
+            available, and whether remote work suits them best. The platform then compares that
+            profile with live opportunities from registered organisations and brings the strongest
+            fits to the surface.
+          </p>
+          <p>
+            The result is a simpler route from good intention to useful action: fewer dead-end
+            searches for volunteers, and better-aligned applicants for organisations.
+          </p>
+        </div>
+        <div className="matching-flow" aria-label="How matching works">
+          <article>
+            <span>01</span>
+            <strong>Build a profile</strong>
+            <p>Choose skills, causes, interests, availability, location, and travel preferences.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>Browse or generate matches</strong>
+            <p>Search freely, then unlock recommendations once the profile has enough detail.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>Connect with confidence</strong>
+            <p>Apply to opportunities that already line up with what volunteers can offer.</p>
+          </article>
+        </div>
+      </section>
+
       <section className="home-strip" aria-label="Platform highlights">
         <article>
           <span className="metric">01</span>
