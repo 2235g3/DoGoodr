@@ -76,6 +76,15 @@ public class ApplicationController {
 				applicationService.createApplicationForVolunteerUser(createApplicationDTO, userId, opportunityId));
 	}
 
+	@PutMapping("/me/{applicationId}/withdraw")
+	@PreAuthorize("hasRole('VOLUNTEER')")
+	public ResponseEntity<ApplicationResponseDTO> withdrawMyApplication(
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@PathVariable UUID applicationId) {
+		return ResponseEntity.ok(applicationService.withdrawApplicationForVolunteerUser(
+				userDetails.getId(), applicationId));
+	}
+
 
 	@GetMapping("/organisation/{opportunityId}")
 	@PreAuthorize("hasRole('ORGANISATION')")

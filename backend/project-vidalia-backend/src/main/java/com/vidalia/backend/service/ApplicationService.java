@@ -135,6 +135,25 @@ public class ApplicationService {
         return responseDTO;
     }
 
+    @Transactional
+    public ApplicationResponseDTO withdrawApplicationForVolunteerUser(UUID userId, UUID applicationId) {
+        VolunteerProfile profile = getVolunteerProfileByUserId(userId);
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + applicationId));
+
+        if (!application.getVolunteerProfile().getId().equals(profile.getId())) {
+            throw new ForbiddenRequestException("Application with id: " + applicationId + " does not belong to the current volunteer");
+        }
+
+        if (application.getStatus() == ApplicationStatus.ACCEPTED || application.getStatus() == ApplicationStatus.COMPLETED) {
+            throw new ForbiddenRequestException("Cannot withdraw an application after it has been accepted or completed");
+        }
+
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        Application updatedApplication = applicationRepository.save(application);
+        return applicationMapper.toDTO(updatedApplication);
+    }
+
     private VolunteerProfile getVolunteerProfileByUserId(UUID userId) {
         return volunteerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));

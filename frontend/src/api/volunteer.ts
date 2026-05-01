@@ -122,6 +122,14 @@ export function createVolunteerApplication(opportunityId: string, payload: Creat
   )
 }
 
+export function withdrawVolunteerApplication(applicationId: string) {
+  return apiRequest<ApplicationDTO>(
+    `/api/applications/me/${applicationId}/withdraw`,
+    { method: 'PUT' },
+    { token: volunteerToken() },
+  )
+}
+
 export function getVolunteerNotifications() {
   return apiRequest<NotificationDTO[]>('/api/notifications', {}, { token: volunteerToken() })
 }
