@@ -48,6 +48,10 @@ export function storeAuthSession(tokens: AuthResponse, user: UserResponseDTO) {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
+export function storeCurrentUser(user: UserResponseDTO) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
 export function clearAuthSession() {
   localStorage.removeItem(ACCESS_TOKEN_KEY)
   localStorage.removeItem(REFRESH_TOKEN_KEY)

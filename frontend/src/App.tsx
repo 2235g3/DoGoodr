@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { AdminLayout } from './components/AdminLayout'
+import { VolunteerLayout } from './components/VolunteerLayout'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { OrganisationSignupPage } from './pages/OrganisationSignupPage'
@@ -12,6 +13,13 @@ import { AdminHistoryPage } from './pages/admin/AdminHistoryPage'
 import { AdminOpportunitiesPage } from './pages/admin/AdminOpportunitiesPage'
 import { AdminProfilesPage } from './pages/admin/AdminProfilesPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
+import { VolunteerAccountPage } from './pages/volunteer/VolunteerAccountPage'
+import { VolunteerApplicationsPage } from './pages/volunteer/VolunteerApplicationsPage'
+import { VolunteerDashboard } from './pages/volunteer/VolunteerDashboard'
+import { VolunteerHistoryPage } from './pages/volunteer/VolunteerHistoryPage'
+import { VolunteerMatchesPage } from './pages/volunteer/VolunteerMatchesPage'
+import { VolunteerNotificationsPage } from './pages/volunteer/VolunteerNotificationsPage'
+import { VolunteerProfilePage } from './pages/volunteer/VolunteerProfilePage'
 
 export default function App() {
   return (
@@ -21,7 +29,15 @@ export default function App() {
       <Route path="/get-started" element={<SignupChoicePage />} />
       <Route path="/signup/volunteer" element={<VolunteerSignupPage />} />
       <Route path="/signup/organisation" element={<OrganisationSignupPage />} />
-      <Route path="/volunteer" element={<RoleLandingPage role="VOLUNTEER" />} />
+      <Route path="/volunteer" element={<VolunteerLayout />}>
+        <Route index element={<VolunteerDashboard />} />
+        <Route path="profile" element={<VolunteerProfilePage />} />
+        <Route path="matches" element={<VolunteerMatchesPage />} />
+        <Route path="applications" element={<VolunteerApplicationsPage />} />
+        <Route path="notifications" element={<VolunteerNotificationsPage />} />
+        <Route path="history" element={<VolunteerHistoryPage />} />
+        <Route path="account" element={<VolunteerAccountPage />} />
+      </Route>
       <Route
         path="/organisation"
         element={<RoleLandingPage role="ORGANISATION" />}

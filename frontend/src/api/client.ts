@@ -1,6 +1,6 @@
 import type { ErrorResponse } from './types'
 
-const API_BASE_URL =
+export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? 'http://localhost:8080'
 
 export class ApiError extends Error {
@@ -26,7 +26,7 @@ export async function apiRequest<TResponse>(
 ): Promise<TResponse> {
   const headers = new Headers(init.headers)
 
-  if (!headers.has('Content-Type') && init.body) {
+  if (!headers.has('Content-Type') && init.body && !(init.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
 

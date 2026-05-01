@@ -744,8 +744,10 @@ h2 {
 
 .admin-form input,
 .admin-form select,
+.admin-form textarea,
 .admin-inline-form input,
 .admin-inline-form select,
+.volunteer-opportunity-card textarea,
 .admin-table input {
   min-height: 44px;
   width: 100%;
@@ -754,6 +756,14 @@ h2 {
   padding: 0 12px;
   color: var(--ink);
   background: var(--paper);
+}
+
+.admin-form textarea,
+.volunteer-opportunity-card textarea {
+  min-height: 120px;
+  padding: 12px;
+  resize: vertical;
+  font: inherit;
 }
 
 .admin-table-wrap {
@@ -878,6 +888,178 @@ h2 {
   border-color: rgba(135, 56, 56, 0.22);
 }
 
+.volunteer-page {
+  min-height: 100svh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(95, 124, 102, 0.18), transparent 28%),
+    radial-gradient(circle at 90% 8%, rgba(154, 189, 121, 0.18), transparent 24%),
+    linear-gradient(135deg, #fcfbf8 0%, #eef3e8 52%, #f5f0e8 100%);
+}
+
+.volunteer-sidebar {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.volunteer-content {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.74)),
+    var(--white);
+}
+
+.volunteer-stat-grid {
+  grid-template-columns: repeat(5, minmax(126px, 1fr));
+}
+
+.volunteer-stat-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(247, 250, 243, 0.92)),
+    var(--white);
+}
+
+.volunteer-action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.volunteer-callout {
+  background:
+    linear-gradient(135deg, rgba(154, 189, 121, 0.14), rgba(63, 52, 102, 0.06)),
+    rgba(255, 255, 255, 0.82);
+}
+
+.volunteer-callout p {
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.volunteer-profile-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: var(--white);
+}
+
+.volunteer-profile-card img,
+.volunteer-avatar-fallback {
+  width: 92px;
+  height: 92px;
+  border-radius: 24px;
+  object-fit: cover;
+}
+
+.volunteer-avatar-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--plum), var(--sage-dark));
+  font-size: 2.6rem;
+  font-weight: 900;
+}
+
+.volunteer-profile-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 1.25rem;
+}
+
+.volunteer-profile-card p,
+.volunteer-opportunity-card p {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.volunteer-file-link {
+  color: var(--plum);
+  font-weight: 850;
+}
+
+.volunteer-facts {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.volunteer-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid rgba(47, 36, 79, 0.08);
+  padding-bottom: 8px;
+}
+
+.volunteer-facts dt {
+  color: var(--ink-soft);
+  font-weight: 850;
+}
+
+.volunteer-facts dd {
+  margin: 0;
+  color: var(--ink);
+  text-align: right;
+}
+
+.volunteer-opportunity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.volunteer-opportunity-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background: var(--white);
+}
+
+.volunteer-opportunity-card h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.45rem;
+}
+
+.volunteer-card-topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.volunteer-card-topline span,
+.volunteer-status-pill {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--ink);
+  background: rgba(154, 189, 121, 0.18);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.volunteer-notification-card.is-read {
+  opacity: 0.72;
+}
+
+.volunteer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.volunteer-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sage-dark);
+}
+
 @media (max-width: 860px) {
   .page {
     padding: 18px;
@@ -918,7 +1100,13 @@ h2 {
   .admin-grid-two,
   .admin-grid-three,
   .admin-action-grid,
-  .admin-card-grid {
+  .admin-card-grid,
+  .volunteer-opportunity-grid,
+  .volunteer-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .volunteer-profile-card {
     grid-template-columns: 1fr;
   }
 

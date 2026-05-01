@@ -94,6 +94,21 @@ export type OrganisationProfileDTO = {
 
 export type OpportunityStatus = 'OPEN' | 'CLOSED'
 
+export type ApplicationStatus =
+  | 'APPLIED'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'CANCELLED'
+  | 'UNDER_REVIEW'
+  | 'WITHDRAWN'
+  | 'COMPLETED'
+
+export type NotificationType =
+  | 'APPLICATION_RECEIVED'
+  | 'DECISION_RECEIVED'
+  | 'VOLUNTEERING_HISTORY_UPDATED'
+  | 'POINTS_EARNED'
+
 export type OpportunityDTO = {
   id: string
   title: string
@@ -122,9 +137,28 @@ export type ApplicationDTO = {
   opportunityId: string
   opportunityName: string
   message: string
-  status: string
+  status: ApplicationStatus | string
   dateApplied: string
   decisionDate?: string | null
+}
+
+export type CreateApplicationDTO = {
+  message: string
+}
+
+export type MatchedOpportunityDTO = {
+  opportunity: OpportunityDTO
+  finalScore: number
+  normalizedScore?: number | null
+  distanceKm?: number | null
+}
+
+export type NotificationDTO = {
+  id: string
+  type: NotificationType
+  message: string
+  timestamp: string
+  read: boolean
 }
 
 export type VolunteerHistoryDTO = {
@@ -139,6 +173,17 @@ export type VolunteerHistoryDTO = {
   endDate: string
   pointsGained: number
   organisationComment?: string | null
+}
+
+export type UpdateVolunteerProfileDTO = {
+  forename?: string | null
+  surname?: string | null
+  preferredName?: string | null
+  contactEmail?: string | null
+  location?: string | null
+  profileDescription?: string | null
+  maxTravelDistance?: number | null
+  availability?: string | null
 }
 
 export type ErrorResponse = {
