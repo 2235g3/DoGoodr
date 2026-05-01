@@ -18,7 +18,8 @@ export function markNotificationRead(token: string, notificationId: string) {
 }
 
 export function makeNotificationSocketUrl(token: string) {
-  const socketUrl = new URL('/ws', API_BASE_URL)
+  const socketBaseUrl = API_BASE_URL || window.location.origin
+  const socketUrl = new URL('/ws', socketBaseUrl)
   socketUrl.protocol = socketUrl.protocol === 'https:' ? 'wss:' : 'ws:'
   socketUrl.searchParams.set('token', token)
   return socketUrl.toString()
