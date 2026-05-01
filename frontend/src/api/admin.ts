@@ -2,10 +2,14 @@ import { apiRequest } from './client'
 import { getStoredAccessToken } from './auth'
 import type {
   ApplicationDTO,
+  CreateLabelDTO,
   CreateUserDTO,
+  LabelDTO,
   OpportunityDTO,
   OrganisationProfileDTO,
   Role,
+  SemanticLinkDTO,
+  SemanticTagDTO,
   UpdateUserDTO,
   UpdateUserPasswordDTO,
   UserResponseDTO,
@@ -201,6 +205,85 @@ export function getAdminVolunteerHistoryByOpportunityAndOrganisation(
   return apiRequest<VolunteerHistoryDTO[]>(
     `/api/admin/volunteering-history/opportunity/${opportunityId}/organisation/${organisationId}`,
     {},
+    { token: adminToken() },
+  )
+}
+
+export function getAdminLabels() {
+  return apiRequest<LabelDTO[]>('/api/labels', {}, { token: adminToken() })
+}
+
+export function createAdminLabel(payload: CreateLabelDTO) {
+  return apiRequest<void>(
+    '/api/labels',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+    { token: adminToken() },
+  )
+}
+
+export function updateAdminLabel(id: number, payload: CreateLabelDTO) {
+  return apiRequest<LabelDTO>(
+    `/api/labels/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+    { token: adminToken() },
+  )
+}
+
+export function deleteAdminLabel(id: number) {
+  return apiRequest<void>(
+    `/api/labels/${id}`,
+    { method: 'DELETE' },
+    { token: adminToken() },
+  )
+}
+
+export function getAdminSemanticTags() {
+  return apiRequest<SemanticTagDTO[]>('/api/semantic-tags', {}, { token: adminToken() })
+}
+
+export function createAdminSemanticTag(payload: SemanticTagDTO) {
+  return apiRequest<SemanticTagDTO>(
+    '/api/semantic-tags',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+    { token: adminToken() },
+  )
+}
+
+export function updateAdminSemanticTag(id: number, payload: SemanticTagDTO) {
+  return apiRequest<SemanticTagDTO>(
+    `/api/semantic-tags/${id}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+    { token: adminToken() },
+  )
+}
+
+export function deleteAdminSemanticTag(id: number) {
+  return apiRequest<void>(
+    `/api/semantic-tags/${id}`,
+    { method: 'DELETE' },
+    { token: adminToken() },
+  )
+}
+
+export function setAdminSemanticRelationship(payload: SemanticLinkDTO) {
+  return apiRequest<void>(
+    '/api/semantic-tags/relationships',
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
     { token: adminToken() },
   )
 }

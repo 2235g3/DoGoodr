@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  getUnreadVolunteerNotifications,
+  getMyVolunteerLabels,
   getVolunteerApplications,
   getVolunteerHistory,
   getVolunteerMatches,
   getVolunteerProfile,
 } from '../../api/volunteer'
+import { useNotifications } from '../../notifications/NotificationContext'
+import { calculateVolunteerProfileCompletion, type VolunteerProfileCompletion } from '../../utils/volunteerProfile'
 import { VolunteerNotice } from './VolunteerNotice'
 
 type DashboardStats = {
@@ -19,8 +21,10 @@ type DashboardStats = {
 
 export function VolunteerDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [completion, setCompletion] = useState<VolunteerProfileCompletion | null>(null)
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const { unreadCount } = useNotifications()
 
   useEffect(() => {
     let isMounted = true
@@ -30,11 +34,12 @@ export function VolunteerDashboard() {
       getVolunteerApplications(),
       getVolunteerHistory(),
       getVolunteerMatches().catch(() => []),
-      getUnreadVolunteerNotifications(),
+      getMyVolunteerLabels(),
     ])
-      .then(([profile, applications, history, matches, unread]) => {
+      .then(([profile, applications, history, matches, labels]) => {
         if (!isMounted) return
         setName(profile.preferredName || profile.forename)
+        setCompletion(calculateVolunteerProfileCompletion(profile, labels))
         setStats({
           points: profile.pointsBalance ?? 0,
           hours:
@@ -42,7 +47,7 @@ export function VolunteerDashboard() {
             history.reduce((total, item) => total + item.hoursLogged, 0),
           applications: applications.length,
           matches: matches.length,
-          unread: unread.length,
+          unread: unreadCount,
         })
       })
       .catch((caughtError) => {
@@ -53,7 +58,7 @@ export function VolunteerDashboard() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [unreadCount])
 
   return (
     <>
@@ -64,6 +69,26 @@ export function VolunteerDashboard() {
       </div>
 
       {error ? <VolunteerNotice tone="error">{error}</VolunteerNotice> : null}
+
+      {completion && !completion.complete ? (
+        <section className="admin-panel volunteer-completion-card">
+          <div>
+            <p className="eyebrow">Profile reminder</p>
+            <h3>Complete your profile to unlock stronger matches.</h3>
+            <p>
+              Your profile is {completion.percent}% complete. Add {completion.missing.join(', ')}
+              {' '}to help the matching service understand what fits you.
+            </p>
+          </div>
+          <div className="volunteer-completion-meter">
+            <strong>{completion.percent}%</strong>
+            <progress value={completion.percent} max={100} />
+          </div>
+          <Link className="button button--primary" to="/volunteer/onboarding">
+            Complete profile
+          </Link>
+        </section>
+      ) : null}
 
       <div className="admin-stat-grid volunteer-stat-grid">
         <StatCard label="Points" value={stats?.points} to="/volunteer/history" />
@@ -77,18 +102,17 @@ export function VolunteerDashboard() {
         <section className="admin-panel">
           <h3>Next best actions</h3>
           <div className="admin-action-grid volunteer-action-grid">
+            <Link to="/volunteer/matches">Browse opportunities</Link>
             <Link to="/volunteer/profile">Update profile</Link>
-            <Link to="/volunteer/matches">Review matches</Link>
             <Link to="/volunteer/applications">Check applications</Link>
           </div>
         </section>
         <section className="admin-panel volunteer-callout">
-          <p className="eyebrow">Discovery note</p>
-          <h3>Matches are the main opportunity feed for now.</h3>
+          <p className="eyebrow">Discovery</p>
+          <h3>Search first, match second.</h3>
           <p>
-            The backend does not yet expose a volunteer-safe endpoint for browsing every
-            open opportunity, so this dashboard focuses on matched opportunities and
-            direct opportunity lookups.
+            Browse all open opportunities now. When your profile and labels are complete, matches
+            become a curated layer on top of search.
           </p>
         </section>
       </div>

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getVolunteerApplications } from '../../api/volunteer'
+import { getVolunteerApplications, withdrawVolunteerApplication } from '../../api/volunteer'
 import type { ApplicationDTO } from '../../api/types'
 import { VolunteerNotice } from './VolunteerNotice'
 
 export function VolunteerApplicationsPage() {
   const [applications, setApplications] = useState<ApplicationDTO[]>([])
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const filteredApplications = useMemo(
@@ -34,6 +35,20 @@ export function VolunteerApplicationsPage() {
     }
   }
 
+  async function handleWithdraw(applicationId: string) {
+    setError('')
+    setMessage('')
+    try {
+      const updated = await withdrawVolunteerApplication(applicationId)
+      setApplications((current) =>
+        current.map((application) => (application.id === updated.id ? updated : application)),
+      )
+      setMessage('Application withdrawn.')
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Unable to withdraw application.')
+    }
+  }
+
   return (
     <>
       <div className="admin-heading">
@@ -43,6 +58,7 @@ export function VolunteerApplicationsPage() {
       </div>
 
       {error ? <VolunteerNotice tone="error">{error}</VolunteerNotice> : null}
+      {message ? <VolunteerNotice tone="success">{message}</VolunteerNotice> : null}
 
       <div className="admin-panel admin-form">
         <label>
@@ -67,6 +83,7 @@ export function VolunteerApplicationsPage() {
               <th>Applied</th>
               <th>Decision</th>
               <th>Message</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -82,6 +99,15 @@ export function VolunteerApplicationsPage() {
                 <td>{formatDate(application.dateApplied)}</td>
                 <td>{formatDate(application.decisionDate)}</td>
                 <td>{application.message || '...'}</td>
+                <td>
+                  {canWithdraw(application.status) ? (
+                    <button type="button" onClick={() => handleWithdraw(application.id)}>
+                      Withdraw
+                    </button>
+                  ) : (
+                    '...'
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -89,6 +115,10 @@ export function VolunteerApplicationsPage() {
       </div>
     </>
   )
+}
+
+function canWithdraw(status: string) {
+  return ['APPLIED', 'UNDER_REVIEW', 'REJECTED'].includes(status)
 }
 
 function formatDate(value?: string | null) {

@@ -13,10 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/organisation-profile")
-@PreAuthorize("hasRole('ORGANISATION')")
 public class OrganisationProfileController {
 
     private final OrganisationProfileService organisationProfileService;
@@ -26,12 +26,26 @@ public class OrganisationProfileController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<OProfileResponseDTO> getMyOrganisationProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
         return ResponseEntity.ok(organisationProfileService.getOrganisationProfileByUserId(userId));
     }
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
+    public ResponseEntity<List<OProfileResponseDTO>> getOrganisationProfiles() {
+        return ResponseEntity.ok(organisationProfileService.getAllOrganisationProfiles());
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
+    public ResponseEntity<OProfileResponseDTO> getOrganisationProfile(@PathVariable UUID id) {
+        return ResponseEntity.ok(organisationProfileService.getOrganisationProfileById(id));
+    }
+
     @PutMapping("/me")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<OProfileResponseDTO> updateMyOrganisationProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                            @Valid @RequestBody UpdateOrganisationProfileDTO updateDTO) {
         UUID userId = userDetails.getId();
@@ -39,6 +53,7 @@ public class OrganisationProfileController {
     }
 
     @PutMapping(value = "/me/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<OProfileResponseDTO> uploadMyOrganisationProfilePicture(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam("file") MultipartFile file) {
@@ -47,6 +62,7 @@ public class OrganisationProfileController {
     }
 
     @DeleteMapping("/me/profile-picture")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<OProfileResponseDTO> deleteMyOrganisationProfilePicture(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();

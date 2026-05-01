@@ -22,7 +22,10 @@ public class UpdateVolunteerProfileDTO {
     private String location;
     @Column(length = 255)
     private String profileDescription;
+    private Double longitude;
+    private Double latitude;
     private Integer maxTravelDistance;
+    private Boolean remoteOnly;
     @Column(length = 100)
     private String availability;
 }

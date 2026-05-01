@@ -9,6 +9,12 @@ import {
   uploadVolunteerProfilePicture,
 } from '../../api/volunteer'
 import type { VolunteerProfileDTO } from '../../api/types'
+import {
+  availabilityOptions,
+  formatAvailability,
+  hasAvailability,
+  toggleAvailability,
+} from '../../utils/availability'
 import { VolunteerNotice } from './VolunteerNotice'
 
 type ProfileForm = {
@@ -18,7 +24,10 @@ type ProfileForm = {
   contactEmail: string
   location: string
   profileDescription: string
+  longitude: string
+  latitude: string
   maxTravelDistance: string
+  remoteOnly: boolean
   availability: string
 }
 
@@ -55,7 +64,10 @@ export function VolunteerProfilePage() {
         contactEmail: form.contactEmail || null,
         location: form.location || null,
         profileDescription: form.profileDescription || null,
+        longitude: form.longitude ? Number(form.longitude) : null,
+        latitude: form.latitude ? Number(form.latitude) : null,
         maxTravelDistance: form.maxTravelDistance ? Number(form.maxTravelDistance) : null,
+        remoteOnly: form.remoteOnly,
         availability: form.availability || null,
       })
       setProfile(nextProfile)
@@ -95,7 +107,7 @@ export function VolunteerProfilePage() {
     }
   }
 
-  function updateField(field: keyof ProfileForm, value: string) {
+  function updateField<TField extends keyof ProfileForm>(field: TField, value: ProfileForm[TField]) {
     setForm((current) => ({ ...current, [field]: value }))
   }
 
@@ -140,6 +152,26 @@ export function VolunteerProfilePage() {
             Location
             <input value={form.location} onChange={(event) => updateField('location', event.target.value)} />
           </label>
+          <div className="admin-grid-two">
+            <label>
+              Longitude
+              <input
+                step="any"
+                type="number"
+                value={form.longitude}
+                onChange={(event) => updateField('longitude', event.target.value)}
+              />
+            </label>
+            <label>
+              Latitude
+              <input
+                step="any"
+                type="number"
+                value={form.latitude}
+                onChange={(event) => updateField('latitude', event.target.value)}
+              />
+            </label>
+          </div>
           <label>
             Max travel distance
             <input
@@ -149,13 +181,34 @@ export function VolunteerProfilePage() {
               onChange={(event) => updateField('maxTravelDistance', event.target.value)}
             />
           </label>
-          <label>
-            Availability
+          <label className="volunteer-toggle">
             <input
-              value={form.availability}
-              onChange={(event) => updateField('availability', event.target.value)}
+              checked={form.remoteOnly}
+              type="checkbox"
+              onChange={(event) => updateField('remoteOnly', event.target.checked)}
             />
+            Remote only
           </label>
+          <fieldset className="availability-fieldset">
+            <legend>Availability</legend>
+            <div className="availability-options">
+              {availabilityOptions.map((option) => (
+                <label className="volunteer-toggle" key={option.value}>
+                  <input
+                    checked={hasAvailability(form.availability, option.value)}
+                    type="checkbox"
+                    onChange={(event) =>
+                      updateField(
+                        'availability',
+                        toggleAvailability(form.availability, option.value, event.target.checked),
+                      )
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <label>
             Profile description
             <textarea
@@ -172,11 +225,16 @@ export function VolunteerProfilePage() {
         <section className="admin-panel admin-form">
           <h3>Files and matching data</h3>
           <div className="volunteer-profile-card">
-            {profile?.profilePictureUrl ? (
-              <img src={resolveMediaUrl(profile.profilePictureUrl)} alt="" />
-            ) : (
-              <div className="volunteer-avatar-fallback">{profile?.preferredName?.slice(0, 1) ?? 'D'}</div>
-            )}
+            <img
+              src={resolveProfilePictureUrl(profile?.profilePictureUrl)}
+              alt=""
+              onError={(event) => {
+                const fallbackUrl = resolveProfilePictureUrl()
+                if (event.currentTarget.src !== fallbackUrl) {
+                  event.currentTarget.src = fallbackUrl
+                }
+              }}
+            />
             <div>
               <strong>{profile?.preferredName || profile?.forename || 'Volunteer'}</strong>
               <p>{profile?.profileDescription || 'No profile description yet.'}</p>
@@ -198,7 +256,7 @@ export function VolunteerProfilePage() {
             />
           </label>
           <button
-            className="button button--secondary"
+            className="button button--secondary button--compact"
             type="button"
             onClick={() => handleDelete(deleteVolunteerProfilePicture, 'Profile picture removed.')}
           >
@@ -226,7 +284,7 @@ export function VolunteerProfilePage() {
             </a>
           ) : null}
           <button
-            className="button button--secondary"
+            className="button button--secondary button--compact"
             type="button"
             onClick={() => handleDelete(deleteVolunteerCv, 'CV removed.')}
           >
@@ -237,6 +295,10 @@ export function VolunteerProfilePage() {
             <div>
               <dt>Remote only</dt>
               <dd>{profile?.remoteOnly ? 'Yes' : 'No'}</dd>
+            </div>
+            <div>
+              <dt>Availability</dt>
+              <dd>{formatAvailability(profile?.availability)}</dd>
             </div>
             <div>
               <dt>Total hours</dt>
@@ -260,7 +322,10 @@ const emptyForm: ProfileForm = {
   contactEmail: '',
   location: '',
   profileDescription: '',
+  longitude: '',
+  latitude: '',
   maxTravelDistance: '',
+  remoteOnly: false,
   availability: '',
 }
 
@@ -272,7 +337,10 @@ function makeForm(profile: VolunteerProfileDTO): ProfileForm {
     contactEmail: profile.contactEmail ?? '',
     location: profile.location ?? '',
     profileDescription: profile.profileDescription ?? '',
+    longitude: profile.longitude?.toString() ?? '',
+    latitude: profile.latitude?.toString() ?? '',
     maxTravelDistance: profile.maxTravelDistance?.toString() ?? '',
+    remoteOnly: profile.remoteOnly,
     availability: profile.availability ?? '',
   }
 }
@@ -283,4 +351,8 @@ function resolveMediaUrl(value: string) {
   }
 
   return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+function resolveProfilePictureUrl(value?: string | null) {
+  return resolveMediaUrl(value || '/uploads/profile-pictures/default-profile-picture.png')
 }

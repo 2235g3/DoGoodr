@@ -1,11 +1,13 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { clearAuthSession, getStoredUser } from '../api/auth'
+import { useNotifications } from '../notifications/NotificationContext'
 import { BrandHeader } from './BrandHeader'
 
 const volunteerLinks = [
   { to: '/volunteer', label: 'Dashboard', end: true },
+  { to: '/volunteer/onboarding', label: 'Onboarding' },
   { to: '/volunteer/profile', label: 'Profile' },
-  { to: '/volunteer/matches', label: 'Matches' },
+  { to: '/volunteer/matches', label: 'Browse' },
   { to: '/volunteer/applications', label: 'Applications' },
   { to: '/volunteer/notifications', label: 'Notifications' },
   { to: '/volunteer/history', label: 'History' },
@@ -15,6 +17,7 @@ const volunteerLinks = [
 export function VolunteerLayout() {
   const navigate = useNavigate()
   const user = getStoredUser()
+  const { unreadCount } = useNotifications()
 
   function handleLogout() {
     clearAuthSession()
@@ -47,7 +50,12 @@ export function VolunteerLayout() {
 
   return (
     <main className="volunteer-page">
-      <BrandHeader variant="panel" />
+      <BrandHeader variant="panel">
+        <div className="workspace-header-meta">
+          <span>Volunteer workspace</span>
+          <Link to="/volunteer/matches">Browse opportunities</Link>
+        </div>
+      </BrandHeader>
       <div className="admin-shell">
         <aside className="admin-sidebar volunteer-sidebar">
           <div>
@@ -63,7 +71,10 @@ export function VolunteerLayout() {
                 end={link.end}
                 className={({ isActive }) => (isActive ? 'is-active' : undefined)}
               >
-                {link.label}
+                <span className="notification-nav-label">{link.label}</span>
+                {link.label === 'Notifications' && unreadCount > 0 ? (
+                  <span className="notification-badge">{unreadCount}</span>
+                ) : null}
               </NavLink>
             ))}
           </nav>

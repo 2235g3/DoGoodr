@@ -1,15 +1,20 @@
 import { apiRequest } from './client'
 import type {
+  AssignedLabelDTO,
   ApplicationResponseDTO,
   ApplicationStatus,
   CreateOpportunityDTO,
+  LabelDTO,
   CreateVolunteerHistoryDTO,
   NotificationResponseDTO,
   OProfileResponseDTO,
   OpportunityResponseDTO,
   UpdateOpportunityDTO,
   UpdateOrganisationProfileDTO,
+  UpdateVolunteerHistoryDateRangeDTO,
+  VolunteerHistoryCommentDTO,
   VolunteerHistoryResponseDTO,
+  VolunteeredHoursDTO,
 } from './types'
 
 export function getOrganisationProfile(token: string) {
@@ -44,6 +49,14 @@ export function uploadOrganisationProfilePicture(token: string, file: File) {
       method: 'PUT',
       body,
     },
+    { token },
+  )
+}
+
+export function deleteOrganisationProfilePicture(token: string) {
+  return apiRequest<OProfileResponseDTO>(
+    '/api/organisation-profile/me/profile-picture',
+    { method: 'DELETE' },
     { token },
   )
 }
@@ -94,6 +107,33 @@ export function deleteOpportunity(token: string, opportunityId: string) {
   return apiRequest<void>(
     `/api/opportunities/${opportunityId}`,
     { method: 'DELETE' },
+    { token },
+  )
+}
+
+export function getLabels(token: string) {
+  return apiRequest<LabelDTO[]>('/api/labels', { method: 'GET' }, { token })
+}
+
+export function getOpportunityLabels(token: string, opportunityId: string) {
+  return apiRequest<AssignedLabelDTO[]>(
+    `/api/labels/opportunity/${opportunityId}`,
+    { method: 'GET' },
+    { token },
+  )
+}
+
+export function setOpportunityLabels(
+  token: string,
+  opportunityId: string,
+  labels: AssignedLabelDTO[],
+) {
+  return apiRequest<AssignedLabelDTO[]>(
+    `/api/labels/opportunity/${opportunityId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(labels),
+    },
     { token },
   )
 }
@@ -159,6 +199,51 @@ export function createVolunteerHistory(
     `/api/volunteering-history/volunteer/${volunteerId}`,
     {
       method: 'POST',
+      body: JSON.stringify(payload),
+    },
+    { token },
+  )
+}
+
+export function updateVolunteerHistoryDateRange(
+  token: string,
+  historyId: number,
+  payload: UpdateVolunteerHistoryDateRangeDTO,
+) {
+  return apiRequest<VolunteerHistoryResponseDTO>(
+    `/api/volunteering-history/${historyId}/date-range`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    },
+    { token },
+  )
+}
+
+export function updateVolunteerHistoryComment(
+  token: string,
+  historyId: number,
+  payload: VolunteerHistoryCommentDTO,
+) {
+  return apiRequest<VolunteerHistoryResponseDTO>(
+    `/api/volunteering-history/${historyId}/comment`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    },
+    { token },
+  )
+}
+
+export function addVolunteerHistoryHours(
+  token: string,
+  historyId: number,
+  payload: VolunteeredHoursDTO,
+) {
+  return apiRequest<VolunteerHistoryResponseDTO>(
+    `/api/volunteering-history/${historyId}/hours`,
+    {
+      method: 'PATCH',
       body: JSON.stringify(payload),
     },
     { token },

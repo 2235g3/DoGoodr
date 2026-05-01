@@ -1,48 +1,31 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  getUnreadVolunteerNotifications,
-  getVolunteerNotifications,
-  markVolunteerNotificationRead,
-} from '../../api/volunteer'
-import type { NotificationDTO } from '../../api/types'
+import { useNotifications } from '../../notifications/NotificationContext'
 import { VolunteerNotice } from './VolunteerNotice'
 
 export function VolunteerNotificationsPage() {
-  const [notifications, setNotifications] = useState<NotificationDTO[]>([])
+  const { notifications, connectionState, markRead, refreshNotifications } = useNotifications()
   const [showUnreadOnly, setShowUnreadOnly] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const sortedNotifications = useMemo(
     () =>
-      [...notifications].sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      ),
-    [notifications],
+      notifications
+        .filter((notification) => !showUnreadOnly || !notification.read)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+    [notifications, showUnreadOnly],
   )
 
   useEffect(() => {
-    loadNotifications(showUnreadOnly)
-  }, [showUnreadOnly])
-
-  async function loadNotifications(unreadOnly = showUnreadOnly) {
-    setError('')
-    try {
-      setNotifications(
-        unreadOnly ? await getUnreadVolunteerNotifications() : await getVolunteerNotifications(),
-      )
-    } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'Unable to load notifications.')
-    }
-  }
+    void refreshNotifications()
+  }, [refreshNotifications])
 
   async function handleMarkRead(notificationId: string) {
     setError('')
     setMessage('')
     try {
-      await markVolunteerNotificationRead(notificationId)
+      await markRead(notificationId)
       setMessage('Notification marked as read.')
-      await loadNotifications()
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to update notification.')
     }
@@ -53,7 +36,10 @@ export function VolunteerNotificationsPage() {
       <div className="admin-heading">
         <p className="eyebrow">Notifications</p>
         <h2>Updates</h2>
-        <p>Read messages about decisions, points, and volunteering history updates.</p>
+        <p>
+          Read messages about decisions, points, and volunteering history updates.
+          Real-time connection: {connectionState}.
+        </p>
       </div>
 
       {message ? <VolunteerNotice tone="success">{message}</VolunteerNotice> : null}

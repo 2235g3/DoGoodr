@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +35,39 @@ public class OpportunityController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<OpportunityResponseDTO>> getAllOpportunities() {
         return ResponseEntity.ok(opportunityService.getAllOpportunities());
+    }
+
+    @GetMapping("/open")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
+    public ResponseEntity<List<OpportunityResponseDTO>> getOpenOpportunities() {
+        return ResponseEntity.ok(opportunityService.getOpenOpportunities());
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
+    public ResponseEntity<List<OpportunityResponseDTO>> searchOpportunities(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Boolean remote,
+            @RequestParam(required = false) UUID organisationId,
+            @RequestParam(required = false) Integer maxHours,
+            @RequestParam(required = false) LocalDate startsAfter,
+            @RequestParam(required = false) LocalDate startsBefore,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude,
+            @RequestParam(required = false) Double maxDistanceKm,
+            @RequestParam(defaultValue = "newest") String sort) {
+        return ResponseEntity.ok(opportunityService.searchOpenOpportunities(
+                q,
+                remote,
+                organisationId,
+                maxHours,
+                startsAfter,
+                startsBefore,
+                latitude,
+                longitude,
+                maxDistanceKm,
+                sort
+        ));
     }
 
     @GetMapping("/organisation/{organisationId}")

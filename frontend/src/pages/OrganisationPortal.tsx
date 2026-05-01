@@ -1,35 +1,47 @@
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom'
-import { ApiError } from '../api/client'
+import { API_BASE_URL, ApiError } from '../api/client'
 import { clearAuthSession, getAccessToken, getStoredUser } from '../api/auth'
 import {
+  addVolunteerHistoryHours,
   createOpportunity,
   createVolunteerHistory,
+  deleteOrganisationProfilePicture,
   deleteOpportunity,
-  getNotifications,
+  getLabels,
   getOpportunity,
   getOpportunityHistory,
+  getOpportunityLabels,
   getOrganisationApplications,
   getOrganisationOpportunities,
   getOrganisationProfile,
-  markNotificationRead,
+  setOpportunityLabels,
   updateApplicationStatus,
   updateOpportunity,
   updateOrganisationProfile,
+  updateVolunteerHistoryComment,
+  updateVolunteerHistoryDateRange,
   uploadOrganisationProfilePicture,
 } from '../api/organisation'
 import type {
   AccountType,
+  AssignedLabelDTO,
   ApplicationResponseDTO,
   ApplicationStatus,
   CreateOpportunityDTO,
-  NotificationResponseDTO,
+  LabelDTO,
   OProfileResponseDTO,
   OpportunityResponseDTO,
   OpportunityStatus,
   UpdateOrganisationProfileDTO,
   VolunteerHistoryResponseDTO,
 } from '../api/types'
+import { useNotifications } from '../notifications/NotificationContext'
+import {
+  availabilityOptions,
+  hasAvailability,
+  toggleAvailability,
+} from '../utils/availability'
 import '../styles/organisation.css'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error'
@@ -105,6 +117,18 @@ function cleanPayload(payload: CreateOpportunityDTO) {
   ) as CreateOpportunityDTO
 }
 
+function resolveMediaUrl(value: string) {
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value
+  }
+
+  return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+function resolveProfilePictureUrl(value?: string | null) {
+  return resolveMediaUrl(value || '/uploads/profile-pictures/default-profile-picture.png')
+}
+
 function EmptyState({ children }: { children: ReactNode }) {
   return <div className="org-empty">{children}</div>
 }
@@ -130,6 +154,7 @@ function OrganisationShell({
 }) {
   const navigate = useNavigate()
   const { token, user, isOrganisation } = useOrganisationAuth()
+  const { unreadCount } = useNotifications()
 
   function handleLogout() {
     clearAuthSession()
@@ -180,7 +205,10 @@ function OrganisationShell({
           <NavLink to="/organisation/opportunities">Opportunities</NavLink>
           <NavLink to="/organisation/applications">Applications</NavLink>
           <NavLink to="/organisation/history">Volunteer history</NavLink>
-          <NavLink to="/organisation/notifications">Notifications</NavLink>
+          <NavLink to="/organisation/notifications">
+            <span className="notification-nav-label">Notifications</span>
+            {unreadCount > 0 ? <span className="notification-badge">{unreadCount}</span> : null}
+          </NavLink>
         </nav>
         <button className="org-logout" type="button" onClick={handleLogout}>
           Logout
@@ -203,12 +231,12 @@ function OrganisationShell({
 
 export function OrganisationDashboardPage() {
   const { token } = useOrganisationAuth()
+  const { unreadCount } = useNotifications()
   const [state, setState] = useState<LoadState>('loading')
   const [error, setError] = useState('')
   const [profile, setProfile] = useState<OProfileResponseDTO | null>(null)
   const [opportunities, setOpportunities] = useState<OpportunityResponseDTO[]>([])
   const [applications, setApplications] = useState<ApplicationResponseDTO[]>([])
-  const [notifications, setNotifications] = useState<NotificationResponseDTO[]>([])
 
   useEffect(() => {
     if (!token) {
@@ -220,16 +248,14 @@ export function OrganisationDashboardPage() {
       try {
         setState('loading')
         const nextProfile = await getOrganisationProfile(accessToken)
-        const [nextOpportunities, nextApplications, nextNotifications] = await Promise.all([
+        const [nextOpportunities, nextApplications] = await Promise.all([
           getOrganisationOpportunities(accessToken, nextProfile.id),
           getOrganisationApplications(accessToken),
-          getNotifications(accessToken),
         ])
 
         setProfile(nextProfile)
         setOpportunities(nextOpportunities)
         setApplications(nextApplications)
-        setNotifications(nextNotifications)
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -244,7 +270,6 @@ export function OrganisationDashboardPage() {
   const pendingApplications = applications.filter((item) =>
     ['APPLIED', 'UNDER_REVIEW'].includes(item.status),
   ).length
-  const unreadNotifications = notifications.filter((item) => !item.read).length
 
   return (
     <OrganisationShell
@@ -274,7 +299,7 @@ export function OrganisationDashboardPage() {
               <p>Applications to review</p>
             </article>
             <article>
-              <span>{unreadNotifications}</span>
+              <span>{unreadCount}</span>
               <p>Unread notifications</p>
             </article>
           </section>
@@ -357,6 +382,7 @@ export function OrganisationProfilePage() {
         setProfile(nextProfile)
         setForm({
           displayName: nextProfile.displayName,
+          accountType: nextProfile.accountType ?? undefined,
           description: nextProfile.description ?? '',
           contactEmail: nextProfile.contactEmail ?? '',
           location: nextProfile.location ?? '',
@@ -407,6 +433,22 @@ export function OrganisationProfilePage() {
       const updated = await uploadOrganisationProfilePicture(token, event.target.files[0])
       setProfile(updated)
       setSuccess('Profile picture updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    }
+  }
+
+  async function handleDeleteProfilePicture() {
+    if (!token) {
+      return
+    }
+
+    try {
+      setError('')
+      setSuccess('')
+      const updated = await deleteOrganisationProfilePicture(token)
+      setProfile(updated)
+      setSuccess('Profile picture removed.')
     } catch (caughtError) {
       setError(getErrorMessage(caughtError))
     }
@@ -489,14 +531,32 @@ export function OrganisationProfilePage() {
           </div>
 
           <aside className="org-panel">
+            <h2>Status</h2>
+            <div className="org-list-row">
+              <div>
+                <strong>{profile?.verified ? 'Verified' : 'Awaiting verification'}</strong>
+                <p>{profile?.accountType?.replace('_', ' ') ?? 'Account type not set'}</p>
+              </div>
+            </div>
             <h2>Profile picture</h2>
-            {profile?.profilePictureUrl ? (
-              <img className="org-avatar-preview" src={profile.profilePictureUrl} alt="" />
-            ) : null}
+            <img
+              className="org-avatar-preview"
+              src={resolveProfilePictureUrl(profile?.profilePictureUrl)}
+              alt=""
+              onError={(event) => {
+                const fallbackUrl = resolveProfilePictureUrl()
+                if (event.currentTarget.src !== fallbackUrl) {
+                  event.currentTarget.src = fallbackUrl
+                }
+              }}
+            />
             <label className="org-upload">
               Upload image
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} />
             </label>
+            <button className="button button--secondary" type="button" onClick={handleDeleteProfilePicture}>
+              Remove image
+            </button>
           </aside>
         </section>
       ) : null}
@@ -630,6 +690,8 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
   const [state, setState] = useState<LoadState>(mode === 'edit' ? 'loading' : 'ready')
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [labels, setLabels] = useState<LabelDTO[]>([])
+  const [assignedLabels, setAssignedLabels] = useState<AssignedLabelDTO[]>([])
   const [form, setForm] = useState<CreateOpportunityDTO>({
     title: '',
     description: '',
@@ -646,6 +708,15 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
   })
 
   useEffect(() => {
+    if (!token) {
+      return
+    }
+    getLabels(token)
+      .then(setLabels)
+      .catch((caughtError) => setError(getErrorMessage(caughtError)))
+  }, [token])
+
+  useEffect(() => {
     if (!token || mode !== 'edit' || !opportunityId) {
       return
     }
@@ -655,7 +726,10 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     async function loadOpportunity() {
       try {
         setState('loading')
-        const opportunity = await getOpportunity(accessToken, currentOpportunityId)
+        const [opportunity, nextLabels] = await Promise.all([
+          getOpportunity(accessToken, currentOpportunityId),
+          getOpportunityLabels(accessToken, currentOpportunityId),
+        ])
         setForm({
           title: opportunity.title,
           description: opportunity.description,
@@ -672,6 +746,7 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
           capacity: opportunity.capacity ?? null,
           status: opportunity.status,
         })
+        setAssignedLabels(nextLabels)
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -687,6 +762,23 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     value: CreateOpportunityDTO[K],
   ) {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function toggleOpportunityLabel(label: LabelDTO) {
+    setAssignedLabels((current) => {
+      if (current.some((assignedLabel) => assignedLabel.labelId === label.id)) {
+        return current.filter((assignedLabel) => assignedLabel.labelId !== label.id)
+      }
+      return [...current, { labelId: label.id, weight: label.required ? 1 : 0.8 }]
+    })
+  }
+
+  function updateOpportunityLabelWeight(labelId: number, weight: number) {
+    setAssignedLabels((current) =>
+      current.map((assignedLabel) =>
+        assignedLabel.labelId === labelId ? { ...assignedLabel, weight } : assignedLabel,
+      ),
+    )
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -714,11 +806,13 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     try {
       setIsSaving(true)
       setError('')
+      let savedOpportunity: OpportunityResponseDTO
       if (mode === 'edit' && opportunityId) {
-        await updateOpportunity(token, opportunityId, payload)
+        savedOpportunity = await updateOpportunity(token, opportunityId, payload)
       } else {
-        await createOpportunity(token, payload)
+        savedOpportunity = await createOpportunity(token, payload)
       }
+      await setOpportunityLabels(token, savedOpportunity.id, assignedLabels)
       navigate('/organisation/opportunities')
     } catch (caughtError) {
       setError(getErrorMessage(caughtError))
@@ -835,16 +929,69 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
                 }
               />
             </label>
-            <label>
-              Availability
-              <input
-                name="availability"
-                value={form.availability ?? ''}
-                onChange={(event) => updateField('availability', event.target.value)}
-                placeholder="Weekday mornings, weekends"
-              />
-            </label>
           </div>
+          <fieldset className="availability-fieldset">
+            <legend>Availability</legend>
+            <div className="availability-options">
+              {availabilityOptions.map((option) => (
+                <label className="volunteer-toggle" key={option.value}>
+                  <input
+                    checked={hasAvailability(form.availability ?? '', option.value)}
+                    type="checkbox"
+                    onChange={(event) =>
+                      updateField(
+                        'availability',
+                        toggleAvailability(
+                          form.availability ?? '',
+                          option.value,
+                          event.target.checked,
+                        ),
+                      )
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+            <input name="availability" type="hidden" value={form.availability ?? ''} />
+          </fieldset>
+          <fieldset className="availability-fieldset">
+            <legend>Matching labels</legend>
+            <p className="org-small-note">
+              Select the skills, causes, and interests that should drive volunteer matching.
+            </p>
+            <div className="opportunity-label-grid">
+              {labels.map((label) => {
+                const assignedLabel = assignedLabels.find((item) => item.labelId === label.id)
+                return (
+                  <div className="opportunity-label-row" key={label.id}>
+                    <label className="volunteer-toggle">
+                      <input
+                        checked={Boolean(assignedLabel)}
+                        type="checkbox"
+                        onChange={() => toggleOpportunityLabel(label)}
+                      />
+                      {label.name}
+                    </label>
+                    <span>{label.type.toLowerCase()}</span>
+                    {assignedLabel ? (
+                      <input
+                        aria-label={`${label.name} match weight`}
+                        max="1"
+                        min="0.1"
+                        step="0.1"
+                        type="number"
+                        value={assignedLabel.weight}
+                        onChange={(event) =>
+                          updateOpportunityLabelWeight(label.id, Number(event.target.value))
+                        }
+                      />
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          </fieldset>
           <div className="org-checks">
             <label>
               <input
@@ -1001,6 +1148,7 @@ export function OrganisationHistoryPage() {
   const [selectedOpportunityId, setSelectedOpportunityId] = useState('')
   const [history, setHistory] = useState<VolunteerHistoryResponseDTO[]>([])
   const [isCreating, setIsCreating] = useState(false)
+  const [updatingHistoryId, setUpdatingHistoryId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!token) {
@@ -1084,6 +1232,86 @@ export function OrganisationHistoryPage() {
     }
   }
 
+  async function handleUpdateDateRange(
+    event: FormEvent<HTMLFormElement>,
+    historyId: number,
+  ) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await updateVolunteerHistoryDateRange(token, historyId, {
+        startDate: String(formData.get('startDate') ?? ''),
+        endDate: String(formData.get('endDate') ?? ''),
+      })
+      replaceHistoryEntry(updated)
+      setSuccess('History dates updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  async function handleUpdateComment(event: FormEvent<HTMLFormElement>, historyId: number) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await updateVolunteerHistoryComment(token, historyId, {
+        comment: String(formData.get('comment') ?? ''),
+      })
+      replaceHistoryEntry(updated)
+      setSuccess('History comment updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  async function handleAddHours(event: FormEvent<HTMLFormElement>, historyId: number) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+    const hours = Number(formData.get('hours') ?? 0)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await addVolunteerHistoryHours(token, historyId, { hours })
+      replaceHistoryEntry(updated)
+      setSuccess('Volunteer hours updated.')
+      event.currentTarget.reset()
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  function replaceHistoryEntry(updated: VolunteerHistoryResponseDTO) {
+    setHistory((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)))
+  }
+
   return (
     <OrganisationShell eyebrow="Volunteer history" title="Record completed work">
       {state === 'loading' ? <EmptyState>Loading volunteer history tools...</EmptyState> : null}
@@ -1135,8 +1363,8 @@ export function OrganisationHistoryPage() {
               </button>
             </form>
             <p className="org-small-note">
-              Existing entries can be viewed here. The backend response does not currently expose
-              history log IDs, so inline edits are waiting on that field.
+              Accepted volunteers can be logged once the work is complete, then updated as hours
+              and comments are confirmed.
             </p>
           </div>
 
@@ -1149,7 +1377,7 @@ export function OrganisationHistoryPage() {
                 {history.map((entry) => (
                   <article
                     className="org-list-row org-list-row--stacked"
-                    key={`${entry.volunteerId}-${entry.opportunityId}-${entry.startDate}`}
+                    key={entry.id}
                   >
                     <div>
                       <strong>{entry.volunteerName}</strong>
@@ -1159,6 +1387,58 @@ export function OrganisationHistoryPage() {
                     </div>
                     <span>{entry.hoursLogged} hours</span>
                     <p>{entry.organisationComment || 'No organisation comment yet.'}</p>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleUpdateDateRange(event, entry.id)}
+                    >
+                      <input name="startDate" type="date" defaultValue={entry.startDate} required />
+                      <input name="endDate" type="date" defaultValue={entry.endDate} required />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Update dates
+                      </button>
+                    </form>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleAddHours(event, entry.id)}
+                    >
+                      <input
+                        name="hours"
+                        type="number"
+                        min="0"
+                        max="8"
+                        step="0.25"
+                        placeholder="Hours to add"
+                        required
+                      />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Add hours
+                      </button>
+                    </form>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleUpdateComment(event, entry.id)}
+                    >
+                      <input
+                        name="comment"
+                        defaultValue={entry.organisationComment ?? ''}
+                        placeholder="Organisation comment"
+                      />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Save comment
+                      </button>
+                    </form>
                   </article>
                 ))}
               </div>
@@ -1172,20 +1452,24 @@ export function OrganisationHistoryPage() {
 
 export function OrganisationNotificationsPage() {
   const { token } = useOrganisationAuth()
-  const [state, setState] = useState<LoadState>('loading')
+  const {
+    notifications,
+    connectionState,
+    markRead,
+    refreshNotifications,
+  } = useNotifications()
+  const [state, setState] = useState<LoadState>('ready')
   const [error, setError] = useState('')
-  const [notifications, setNotifications] = useState<NotificationResponseDTO[]>([])
 
   useEffect(() => {
     if (!token) {
       return
     }
-    const accessToken = token
 
     async function loadNotifications() {
       try {
         setState('loading')
-        setNotifications(await getNotifications(accessToken))
+        await refreshNotifications()
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -1194,7 +1478,7 @@ export function OrganisationNotificationsPage() {
     }
 
     void loadNotifications()
-  }, [token])
+  }, [token, refreshNotifications])
 
   async function handleMarkRead(notificationId: string) {
     if (!token) {
@@ -1202,12 +1486,7 @@ export function OrganisationNotificationsPage() {
     }
 
     try {
-      await markNotificationRead(token, notificationId)
-      setNotifications((current) =>
-        current.map((notification) =>
-          notification.id === notificationId ? { ...notification, read: true } : notification,
-        ),
-      )
+      await markRead(notificationId)
     } catch (caughtError) {
       setError(getErrorMessage(caughtError))
     }
@@ -1215,6 +1494,7 @@ export function OrganisationNotificationsPage() {
 
   return (
     <OrganisationShell eyebrow="Notifications" title="Organisation updates">
+      <p className="org-small-note">Real-time connection: {connectionState}.</p>
       {state === 'loading' ? <EmptyState>Loading notifications...</EmptyState> : null}
       {state === 'error' ? <InlineError message={error} /> : null}
       {error && state === 'ready' ? <InlineError message={error} /> : null}

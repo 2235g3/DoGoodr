@@ -9,6 +9,7 @@ const adminLinks = [
   { to: '/admin/opportunities', label: 'Opportunities' },
   { to: '/admin/applications', label: 'Applications' },
   { to: '/admin/history', label: 'History' },
+  { to: '/admin/taxonomy', label: 'Taxonomy' },
 ]
 
 export function AdminLayout() {
@@ -46,7 +47,12 @@ export function AdminLayout() {
 
   return (
     <main className="admin-page">
-      <BrandHeader variant="panel" />
+      <BrandHeader variant="panel">
+        <div className="workspace-header-meta">
+          <span>Admin workspace</span>
+          <Link to="/admin/taxonomy">Tune taxonomy</Link>
+        </div>
+      </BrandHeader>
       <div className="admin-shell">
         <aside className="admin-sidebar">
           <div>

@@ -25,6 +25,8 @@ export type NotificationType =
   | 'VOLUNTEERING_HISTORY_UPDATED'
   | 'POINTS_EARNED'
 
+export type LabelType = 'SKILL' | 'INTEREST' | 'CAUSE' | 'LANGUAGE' | 'EDUCATION' | 'OTHER'
+
 export type AuthResponse = {
   accessToken: string
   refreshToken: string
@@ -106,13 +108,18 @@ export type UpdateVolunteerProfileDTO = {
   contactEmail?: string | null
   location?: string | null
   profileDescription?: string | null
+  longitude?: number | null
+  latitude?: number | null
   maxTravelDistance?: number | null
+  remoteOnly?: boolean | null
   availability?: string | null
 }
 
 export type OrganisationProfileDTO = {
   id: string
   displayName: string
+  accountType?: AccountType | null
+  verified: boolean
   profilePictureUrl?: string | null
   description?: string | null
   contactEmail?: string | null
@@ -153,6 +160,21 @@ export type OpportunityDTO = {
 }
 
 export type OpportunityResponseDTO = OpportunityDTO
+
+export type OpportunitySearchSort = 'newest' | 'start-date' | 'closest' | 'hours' | 'organisation'
+
+export type OpportunitySearchParams = {
+  q?: string
+  remote?: boolean
+  organisationId?: string
+  maxHours?: number
+  startsAfter?: string
+  startsBefore?: string
+  latitude?: number
+  longitude?: number
+  maxDistanceKm?: number
+  sort?: OpportunitySearchSort
+}
 
 export type CreateOpportunityDTO = {
   title: string
@@ -198,6 +220,37 @@ export type MatchedOpportunityDTO = {
   distanceKm?: number | null
 }
 
+export type LabelDTO = {
+  id: number
+  name: string
+  semanticTag?: string | null
+  required: boolean
+  type: LabelType
+}
+
+export type CreateLabelDTO = {
+  name: string
+  semanticTag?: { id: number; name: string } | null
+  required: boolean
+  type: LabelType
+}
+
+export type AssignedLabelDTO = {
+  labelId: number
+  weight: number
+}
+
+export type SemanticTagDTO = {
+  id?: number
+  name: string
+}
+
+export type SemanticLinkDTO = {
+  one: { id: number; name: string }
+  two: { id: number; name: string }
+  weight: number
+}
+
 export type NotificationDTO = {
   id: string
   type: NotificationType
@@ -209,6 +262,7 @@ export type NotificationDTO = {
 export type NotificationResponseDTO = NotificationDTO
 
 export type VolunteerHistoryDTO = {
+  id: number
   volunteerId: string
   volunteerName: string
   opportunityId: string
@@ -228,6 +282,19 @@ export type CreateVolunteerHistoryDTO = {
   opportunityId: string
   startDate: string
   endDate: string
+}
+
+export type UpdateVolunteerHistoryDateRangeDTO = {
+  startDate: string
+  endDate: string
+}
+
+export type VolunteerHistoryCommentDTO = {
+  comment: string
+}
+
+export type VolunteeredHoursDTO = {
+  hours: number
 }
 
 export type ErrorResponse = {

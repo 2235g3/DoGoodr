@@ -14,6 +14,9 @@ public class VolunteerHistoryMapper {
         VolunteerHistory history = new VolunteerHistory();
         history.setStartDate(createDTO.getStartDate());
         history.setEndDate(createDTO.getEndDate());
+        history.setHoursLogged(0);
+        history.setPointsEarned(0);
+        history.setOrganisationComment("");
         // volunteerProfile and opportunity will be set by the service
         return history;
     }
@@ -21,6 +24,8 @@ public class VolunteerHistoryMapper {
     public VolunteerHistoryResponseDTO toDTO(VolunteerHistory history) {
         VolunteerHistoryResponseDTO dto = new VolunteerHistoryResponseDTO();
         if (history == null) return dto;
+
+        dto.setId(history.getId());
 
         VolunteerProfile vp = history.getVolunteerProfile();
         if (vp != null) {

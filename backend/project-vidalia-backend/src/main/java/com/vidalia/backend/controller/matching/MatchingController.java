@@ -21,8 +21,8 @@ import java.util.UUID;
 @RequestMapping("/api/matching/volunteer")
 public class MatchingController {
 
-    MatchingService matchingService;
-    VolunteerProfileService volunteerProfileService;
+    private final MatchingService matchingService;
+    private final VolunteerProfileService volunteerProfileService;
 
     @GetMapping
     @PreAuthorize("hasRole('VOLUNTEER')")

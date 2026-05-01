@@ -48,6 +48,12 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
+    public List<ApplicationResponseDTO> getAllApplicationsForVolunteerUser(UUID userId) {
+        VolunteerProfile profile = getVolunteerProfileByUserId(userId);
+        return getAllApplicationsForVolunteer(profile.getId());
+    }
+
+    @Transactional(readOnly = true)
     public List<ApplicationResponseDTO> getAllApplicationsForOpportunityByOrganisation(UUID organisationId, UUID opportunityId) {
         // Validate that the opportunity belongs to the organisation
         Opportunity opportunity = opportunityRepository.findById(opportunityId)
@@ -102,8 +108,14 @@ public class ApplicationService {
         Application application = applicationMapper.toEntity(profile, opportunity, createApplicationDTO);
         Application savedApplication = applicationRepository.save(application);
         ApplicationResponseDTO responseDTO = applicationMapper.toDTO(savedApplication);
-        sendApplicationNotificationToOrganisation(responseDTO, opportunity.getOrganisationProfile().getId());
+        sendApplicationNotificationToOrganisation(responseDTO, opportunity);
         return responseDTO;
+    }
+
+    @Transactional
+    public ApplicationResponseDTO createApplicationForVolunteerUser(CreateApplicationDTO createApplicationDTO, UUID userId, UUID opportunityId) {
+        VolunteerProfile profile = getVolunteerProfileByUserId(userId);
+        return createApplication(createApplicationDTO, profile.getId(), opportunityId);
     }
 
     @Transactional
@@ -119,21 +131,47 @@ public class ApplicationService {
         application.setStatus(newStatus);
         Application updatedApplication = applicationRepository.save(application);
         ApplicationResponseDTO responseDTO = applicationMapper.toDTO(updatedApplication);
-        sendApplicationStatusChangeNotificationToVolunteer(responseDTO);
+        sendApplicationStatusChangeNotificationToVolunteer(responseDTO, application);
         return responseDTO;
     }
 
-    private void sendApplicationNotificationToOrganisation(ApplicationResponseDTO applicationDTO, UUID organisationId) {
+    @Transactional
+    public ApplicationResponseDTO withdrawApplicationForVolunteerUser(UUID userId, UUID applicationId) {
+        VolunteerProfile profile = getVolunteerProfileByUserId(userId);
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + applicationId));
+
+        if (!application.getVolunteerProfile().getId().equals(profile.getId())) {
+            throw new ForbiddenRequestException("Application with id: " + applicationId + " does not belong to the current volunteer");
+        }
+
+        if (application.getStatus() == ApplicationStatus.ACCEPTED || application.getStatus() == ApplicationStatus.COMPLETED) {
+            throw new ForbiddenRequestException("Cannot withdraw an application after it has been accepted or completed");
+        }
+
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        Application updatedApplication = applicationRepository.save(application);
+        return applicationMapper.toDTO(updatedApplication);
+    }
+
+    private VolunteerProfile getVolunteerProfileByUserId(UUID userId) {
+        return volunteerProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Volunteer profile not found for user id: " + userId));
+    }
+
+    private void sendApplicationNotificationToOrganisation(ApplicationResponseDTO applicationDTO, Opportunity opportunity) {
+        UUID organisationUserId = opportunity.getOrganisationProfile().getUser().getId();
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setRecipientId(organisationId);
+        notificationDTO.setRecipientId(organisationUserId);
         notificationDTO.setType(NotificationType.APPLICATION_RECEIVED);
         notificationDTO.setMessage("New application received for opportunity: " + applicationDTO.getOpportunityName());
         notificationService.createNotification(notificationDTO);
     }
 
-    private void sendApplicationStatusChangeNotificationToVolunteer(ApplicationResponseDTO applicationDTO) {
+    private void sendApplicationStatusChangeNotificationToVolunteer(ApplicationResponseDTO applicationDTO, Application application) {
+        UUID volunteerUserId = application.getVolunteerProfile().getUser().getId();
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setRecipientId(applicationDTO.getVolunteerId());
+        notificationDTO.setRecipientId(volunteerUserId);
         notificationDTO.setType(NotificationType.DECISION_RECEIVED);
         notificationDTO.setMessage("The status of your application for opportunity: " + applicationDTO.getOpportunityName() + " has been updated.");
         notificationService.createNotification(notificationDTO);

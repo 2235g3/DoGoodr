@@ -197,7 +197,7 @@ export function AdminUsersPage() {
           </button>
         </form>
 
-        <div className="admin-panel admin-form">
+        <div className="admin-panel admin-form admin-find-users-panel">
           <h3>Find users</h3>
           <form className="admin-inline-form" onSubmit={handleEmailSearch}>
             <input
