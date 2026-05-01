@@ -159,7 +159,7 @@ public class VolunteerHistoryService {
 
     private void sendCreatedNotificationToVolunteer(VolunteerHistory history) {
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setRecipientId(history.getVolunteerProfile().getId());
+        notificationDTO.setRecipientId(history.getVolunteerProfile().getUser().getId());
         notificationDTO.setMessage("A new volunteering entry has been created for opportunity: " + history.getOpportunity().getTitle());
         notificationDTO.setType(NotificationType.VOLUNTEERING_HISTORY_UPDATED);
         notificationService.createNotification(notificationDTO);
@@ -167,7 +167,7 @@ public class VolunteerHistoryService {
 
     private void sendUpdateNotificationToVolunteer(VolunteerHistory history) {
         CreateNotificationDTO notificationDTO = new CreateNotificationDTO();
-        notificationDTO.setRecipientId(history.getVolunteerProfile().getId());
+        notificationDTO.setRecipientId(history.getVolunteerProfile().getUser().getId());
         notificationDTO.setMessage("Your volunteering entry for opportunity: " + history.getOpportunity().getTitle() + " has been updated.");
         notificationDTO.setType(NotificationType.VOLUNTEERING_HISTORY_UPDATED);
         notificationService.createNotification(notificationDTO);
