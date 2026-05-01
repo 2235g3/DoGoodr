@@ -1,6 +1,13 @@
 SpringDocs.md
 target/
 .mvn/wrapper/maven-wrapper.jar
+
+## Matching docs
+documentation/MATCHING_SPEC.md
+
+### Environment Variables ###
+.env
+.env.local
 !**/src/main/**/target/
 !**/src/test/**/target/
 

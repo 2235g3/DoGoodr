@@ -1,0 +1,12 @@
+target
+.m2
+.git
+.gitignore
+.idea
+.env
+.env.local
+uploads
+node_modules
+**/src/main/**/target
+**/src/test/**/target
+
