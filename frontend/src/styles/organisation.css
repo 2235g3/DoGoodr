@@ -196,6 +196,23 @@
   flex-wrap: wrap;
 }
 
+.org-inline-edit {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  gap: 10px;
+}
+
+.org-inline-edit input {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--paper);
+}
+
 .org-status {
   display: inline-flex;
   align-items: center;
@@ -509,6 +526,7 @@
   .org-grid-two,
   .org-application-grid,
   .org-form-grid,
+  .org-inline-edit,
   .org-nav {
     grid-template-columns: 1fr;
   }

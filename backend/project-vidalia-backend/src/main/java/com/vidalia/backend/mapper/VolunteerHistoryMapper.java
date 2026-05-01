@@ -22,6 +22,8 @@ public class VolunteerHistoryMapper {
         VolunteerHistoryResponseDTO dto = new VolunteerHistoryResponseDTO();
         if (history == null) return dto;
 
+        dto.setId(history.getId());
+
         VolunteerProfile vp = history.getVolunteerProfile();
         if (vp != null) {
             dto.setVolunteerId(vp.getId());

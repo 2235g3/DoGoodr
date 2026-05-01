@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data
 public class VolunteerHistoryResponseDTO {
 
+    private long id;
     private UUID volunteerId;
     private String volunteerName;
     private UUID opportunityId;

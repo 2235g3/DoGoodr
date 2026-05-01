@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { clearAuthSession, getAccessToken, getStoredUser } from '../api/auth'
 import {
+  addVolunteerHistoryHours,
   createOpportunity,
   createVolunteerHistory,
   deleteOpportunity,
@@ -16,6 +17,8 @@ import {
   updateApplicationStatus,
   updateOpportunity,
   updateOrganisationProfile,
+  updateVolunteerHistoryComment,
+  updateVolunteerHistoryDateRange,
   uploadOrganisationProfilePicture,
 } from '../api/organisation'
 import type {
@@ -1001,6 +1004,7 @@ export function OrganisationHistoryPage() {
   const [selectedOpportunityId, setSelectedOpportunityId] = useState('')
   const [history, setHistory] = useState<VolunteerHistoryResponseDTO[]>([])
   const [isCreating, setIsCreating] = useState(false)
+  const [updatingHistoryId, setUpdatingHistoryId] = useState<number | null>(null)
 
   useEffect(() => {
     if (!token) {
@@ -1084,6 +1088,86 @@ export function OrganisationHistoryPage() {
     }
   }
 
+  async function handleUpdateDateRange(
+    event: FormEvent<HTMLFormElement>,
+    historyId: number,
+  ) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await updateVolunteerHistoryDateRange(token, historyId, {
+        startDate: String(formData.get('startDate') ?? ''),
+        endDate: String(formData.get('endDate') ?? ''),
+      })
+      replaceHistoryEntry(updated)
+      setSuccess('History dates updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  async function handleUpdateComment(event: FormEvent<HTMLFormElement>, historyId: number) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await updateVolunteerHistoryComment(token, historyId, {
+        comment: String(formData.get('comment') ?? ''),
+      })
+      replaceHistoryEntry(updated)
+      setSuccess('History comment updated.')
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  async function handleAddHours(event: FormEvent<HTMLFormElement>, historyId: number) {
+    event.preventDefault()
+    if (!token) {
+      return
+    }
+
+    const formData = new FormData(event.currentTarget)
+    const hours = Number(formData.get('hours') ?? 0)
+
+    try {
+      setUpdatingHistoryId(historyId)
+      setError('')
+      setSuccess('')
+      const updated = await addVolunteerHistoryHours(token, historyId, { hours })
+      replaceHistoryEntry(updated)
+      setSuccess('Volunteer hours updated.')
+      event.currentTarget.reset()
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError))
+    } finally {
+      setUpdatingHistoryId(null)
+    }
+  }
+
+  function replaceHistoryEntry(updated: VolunteerHistoryResponseDTO) {
+    setHistory((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)))
+  }
+
   return (
     <OrganisationShell eyebrow="Volunteer history" title="Record completed work">
       {state === 'loading' ? <EmptyState>Loading volunteer history tools...</EmptyState> : null}
@@ -1135,8 +1219,8 @@ export function OrganisationHistoryPage() {
               </button>
             </form>
             <p className="org-small-note">
-              Existing entries can be viewed here. The backend response does not currently expose
-              history log IDs, so inline edits are waiting on that field.
+              Accepted volunteers can be logged once the work is complete, then updated as hours
+              and comments are confirmed.
             </p>
           </div>
 
@@ -1149,7 +1233,7 @@ export function OrganisationHistoryPage() {
                 {history.map((entry) => (
                   <article
                     className="org-list-row org-list-row--stacked"
-                    key={`${entry.volunteerId}-${entry.opportunityId}-${entry.startDate}`}
+                    key={entry.id}
                   >
                     <div>
                       <strong>{entry.volunteerName}</strong>
@@ -1159,6 +1243,58 @@ export function OrganisationHistoryPage() {
                     </div>
                     <span>{entry.hoursLogged} hours</span>
                     <p>{entry.organisationComment || 'No organisation comment yet.'}</p>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleUpdateDateRange(event, entry.id)}
+                    >
+                      <input name="startDate" type="date" defaultValue={entry.startDate} required />
+                      <input name="endDate" type="date" defaultValue={entry.endDate} required />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Update dates
+                      </button>
+                    </form>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleAddHours(event, entry.id)}
+                    >
+                      <input
+                        name="hours"
+                        type="number"
+                        min="0"
+                        max="8"
+                        step="0.25"
+                        placeholder="Hours to add"
+                        required
+                      />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Add hours
+                      </button>
+                    </form>
+                    <form
+                      className="org-inline-edit"
+                      onSubmit={(event) => handleUpdateComment(event, entry.id)}
+                    >
+                      <input
+                        name="comment"
+                        defaultValue={entry.organisationComment ?? ''}
+                        placeholder="Organisation comment"
+                      />
+                      <button
+                        className="button button--secondary"
+                        type="submit"
+                        disabled={updatingHistoryId === entry.id}
+                      >
+                        Save comment
+                      </button>
+                    </form>
                   </article>
                 ))}
               </div>

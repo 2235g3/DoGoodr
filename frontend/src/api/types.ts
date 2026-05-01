@@ -209,6 +209,7 @@ export type NotificationDTO = {
 export type NotificationResponseDTO = NotificationDTO
 
 export type VolunteerHistoryDTO = {
+  id: number
   volunteerId: string
   volunteerName: string
   opportunityId: string
@@ -228,6 +229,19 @@ export type CreateVolunteerHistoryDTO = {
   opportunityId: string
   startDate: string
   endDate: string
+}
+
+export type UpdateVolunteerHistoryDateRangeDTO = {
+  startDate: string
+  endDate: string
+}
+
+export type VolunteerHistoryCommentDTO = {
+  comment: string
+}
+
+export type VolunteeredHoursDTO = {
+  hours: number
 }
 
 export type ErrorResponse = {
