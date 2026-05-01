@@ -360,6 +360,7 @@ export function OrganisationProfilePage() {
         setProfile(nextProfile)
         setForm({
           displayName: nextProfile.displayName,
+          accountType: nextProfile.accountType ?? undefined,
           description: nextProfile.description ?? '',
           contactEmail: nextProfile.contactEmail ?? '',
           location: nextProfile.location ?? '',
@@ -492,6 +493,13 @@ export function OrganisationProfilePage() {
           </div>
 
           <aside className="org-panel">
+            <h2>Status</h2>
+            <div className="org-list-row">
+              <div>
+                <strong>{profile?.verified ? 'Verified' : 'Awaiting verification'}</strong>
+                <p>{profile?.accountType?.replace('_', ' ') ?? 'Account type not set'}</p>
+              </div>
+            </div>
             <h2>Profile picture</h2>
             {profile?.profilePictureUrl ? (
               <img className="org-avatar-preview" src={profile.profilePictureUrl} alt="" />

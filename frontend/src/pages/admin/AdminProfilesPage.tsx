@@ -175,6 +175,14 @@ export function AdminProfilesPage() {
               <small>{profile.id}</small>
               <dl>
                 <div>
+                  <dt>Status</dt>
+                  <dd>{profile.verified ? 'Verified' : 'Unverified'}</dd>
+                </div>
+                <div>
+                  <dt>Type</dt>
+                  <dd>{profile.accountType?.replace('_', ' ') || '...'}</dd>
+                </div>
+                <div>
                   <dt>Location</dt>
                   <dd>{profile.location || '...'}</dd>
                 </div>

@@ -24,6 +24,8 @@ public class OrganisationProfileMapper {
         OProfileResponseDTO response = new OProfileResponseDTO();
         response.setId(organisationProfile.getId());
         response.setDisplayName(organisationProfile.getDisplayName());
+        response.setAccountType(organisationProfile.getAccountType());
+        response.setVerified(organisationProfile.isVerified());
         response.setProfilePictureUrl(organisationProfile.getProfilePictureUrl());
         response.setDescription(organisationProfile.getDescription());
         response.setContactEmail(organisationProfile.getContactEmail());

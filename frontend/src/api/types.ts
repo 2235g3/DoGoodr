@@ -113,6 +113,8 @@ export type UpdateVolunteerProfileDTO = {
 export type OrganisationProfileDTO = {
   id: string
   displayName: string
+  accountType?: AccountType | null
+  verified: boolean
   profilePictureUrl?: string | null
   description?: string | null
   contactEmail?: string | null
