@@ -61,7 +61,7 @@ public class ApplicationController {
 	@PreAuthorize("hasRole('VOLUNTEER')")
 	public ResponseEntity<List<ApplicationResponseDTO>> getMyApplications(
 			@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(applicationService.getAllApplicationsForVolunteer(userDetails.getId()));
+		return ResponseEntity.ok(applicationService.getAllApplicationsForVolunteerUser(userDetails.getId()));
 	}
 
 	@PostMapping("/me/{opportunityId}")
@@ -70,10 +70,10 @@ public class ApplicationController {
 			@AuthenticationPrincipal CustomUserDetails userDetails,
 			@PathVariable UUID opportunityId,
 			@Valid @RequestBody CreateApplicationDTO createApplicationDTO) {
-		UUID volunteerId = userDetails.getId();
+		UUID userId = userDetails.getId();
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(
-				applicationService.createApplication(createApplicationDTO, volunteerId, opportunityId));
+				applicationService.createApplicationForVolunteerUser(createApplicationDTO, userId, opportunityId));
 	}
 
 
