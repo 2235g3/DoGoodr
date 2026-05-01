@@ -95,6 +95,10 @@ export function getVolunteerOpportunityById(id: string) {
   return apiRequest<OpportunityDTO>(`/api/opportunities/${id}`, {}, { token: volunteerToken() })
 }
 
+export function getOpenVolunteerOpportunities() {
+  return apiRequest<OpportunityDTO[]>('/api/opportunities/open', {}, { token: volunteerToken() })
+}
+
 export function getVolunteerOpportunitiesByOrganisation(organisationId: string) {
   return apiRequest<OpportunityDTO[]>(
     `/api/opportunities/organisation/${organisationId}`,

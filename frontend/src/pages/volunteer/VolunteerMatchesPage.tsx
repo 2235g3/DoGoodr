@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import {
   createVolunteerApplication,
+  getOpenVolunteerOpportunities,
   getVolunteerMatches,
   getVolunteerOpportunitiesByOrganisation,
   getVolunteerOpportunityById,
@@ -10,6 +11,7 @@ import { VolunteerNotice } from './VolunteerNotice'
 
 export function VolunteerMatchesPage() {
   const [matches, setMatches] = useState<MatchedOpportunityDTO[]>([])
+  const [openOpportunities, setOpenOpportunities] = useState<OpportunityDTO[]>([])
   const [directOpportunities, setDirectOpportunities] = useState<OpportunityDTO[]>([])
   const [messages, setMessages] = useState<Record<string, string>>({})
   const [opportunityId, setOpportunityId] = useState('')
@@ -24,12 +26,17 @@ export function VolunteerMatchesPage() {
   async function loadMatches() {
     setError('')
     try {
-      setMatches(await getVolunteerMatches())
+      const [nextMatches, nextOpenOpportunities] = await Promise.all([
+        getVolunteerMatches().catch(() => []),
+        getOpenVolunteerOpportunities(),
+      ])
+      setMatches(nextMatches)
+      setOpenOpportunities(nextOpenOpportunities)
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Unable to load matched opportunities.',
+          : 'Unable to load opportunities.',
       )
     }
   }
@@ -146,6 +153,25 @@ export function VolunteerMatchesPage() {
           <VolunteerNotice>
             No matches are available yet. Profile data and backend matching rules decide what appears here.
           </VolunteerNotice>
+        )}
+      </section>
+
+      <section className="admin-panel">
+        <h3>Open opportunities</h3>
+        {openOpportunities.length ? (
+          <div className="volunteer-opportunity-grid">
+            {openOpportunities.map((opportunity) => (
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                message={messages[opportunity.id] ?? ''}
+                onMessageChange={updateMessage}
+                onApply={handleApply}
+              />
+            ))}
+          </div>
+        ) : (
+          <VolunteerNotice>No open opportunities are available right now.</VolunteerNotice>
         )}
       </section>
     </>

@@ -6,6 +6,7 @@ import com.vidalia.backend.dto.opportunity.UpdateOpportunityDTO;
 import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.OpportunityMapper;
 import com.vidalia.backend.model.Opportunity;
+import com.vidalia.backend.model.OpportunityStatus;
 import com.vidalia.backend.model.OrganisationProfile;
 import com.vidalia.backend.repository.OpportunityRepository;
 import com.vidalia.backend.repository.OrganisationProfileRepository;
@@ -30,6 +31,13 @@ public class OpportunityService {
     @Transactional(readOnly = true)
     public List<OpportunityResponseDTO> getAllOpportunities() {
         return opportunityRepository.findAll().stream()
+                .map(opportunityMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<OpportunityResponseDTO> getOpenOpportunities() {
+        return opportunityRepository.findAllByStatus(OpportunityStatus.OPEN).stream()
                 .map(opportunityMapper::toDTO)
                 .collect(Collectors.toList());
     }

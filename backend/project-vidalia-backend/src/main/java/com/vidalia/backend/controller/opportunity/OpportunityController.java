@@ -36,6 +36,12 @@ public class OpportunityController {
         return ResponseEntity.ok(opportunityService.getAllOpportunities());
     }
 
+    @GetMapping("/open")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
+    public ResponseEntity<List<OpportunityResponseDTO>> getOpenOpportunities() {
+        return ResponseEntity.ok(opportunityService.getOpenOpportunities());
+    }
+
     @GetMapping("/organisation/{organisationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VOLUNTEER', 'ORGANISATION')")
     public ResponseEntity<List<OpportunityResponseDTO>> getOpportunitiesByOrganisation(@PathVariable UUID organisationId) {
