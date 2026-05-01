@@ -256,7 +256,7 @@ export function VolunteerProfilePage() {
             />
           </label>
           <button
-            className="button button--secondary"
+            className="button button--secondary button--compact"
             type="button"
             onClick={() => handleDelete(deleteVolunteerProfilePicture, 'Profile picture removed.')}
           >
@@ -284,7 +284,7 @@ export function VolunteerProfilePage() {
             </a>
           ) : null}
           <button
-            className="button button--secondary"
+            className="button button--secondary button--compact"
             type="button"
             onClick={() => handleDelete(deleteVolunteerCv, 'CV removed.')}
           >

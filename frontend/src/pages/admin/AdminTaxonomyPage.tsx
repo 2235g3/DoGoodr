@@ -234,7 +234,7 @@ export function AdminTaxonomyPage() {
           </div>
         </form>
 
-        <form className="admin-panel admin-form" onSubmit={handleSaveTag}>
+        <form className="admin-panel admin-form taxonomy-tag-form" onSubmit={handleSaveTag}>
           <h3>{tagForm.id ? 'Edit semantic tag' : 'Create semantic tag'}</h3>
           <label>
             Name

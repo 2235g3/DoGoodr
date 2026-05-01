@@ -1029,11 +1029,15 @@ h2 {
 .admin-row-actions .taxonomy-action-button {
   min-height: 44px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 0 20px;
   color: var(--white);
   background: var(--ink);
   box-shadow: 0 16px 36px rgba(47, 36, 79, 0.22);
+}
+
+.taxonomy-tag-form {
+  gap: 10px;
 }
 
 .taxonomy-list {
@@ -1475,6 +1479,10 @@ h2 {
   background: var(--white);
 }
 
+.admin-form > .volunteer-profile-card:first-of-type {
+  margin-top: -6px;
+}
+
 .volunteer-profile-card img,
 .volunteer-avatar-fallback {
   width: 92px;
@@ -1582,14 +1590,26 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: flex-start;
+  width: fit-content;
   color: var(--ink);
   font-weight: 850;
+  line-height: 1.25;
 }
 
 .volunteer-toggle input {
+  flex: 0 0 auto;
   width: 18px;
   height: 18px;
   accent-color: var(--sage-dark);
+}
+
+.button--compact {
+  min-height: 36px;
+  width: fit-content;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 860px) {

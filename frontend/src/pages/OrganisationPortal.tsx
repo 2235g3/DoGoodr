@@ -125,6 +125,10 @@ function resolveMediaUrl(value: string) {
   return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`
 }
 
+function resolveProfilePictureUrl(value?: string | null) {
+  return resolveMediaUrl(value || '/uploads/profile-pictures/default-profile-picture.png')
+}
+
 function EmptyState({ children }: { children: ReactNode }) {
   return <div className="org-empty">{children}</div>
 }
@@ -535,13 +539,17 @@ export function OrganisationProfilePage() {
               </div>
             </div>
             <h2>Profile picture</h2>
-            {profile?.profilePictureUrl ? (
-              <img
-                className="org-avatar-preview"
-                src={resolveMediaUrl(profile.profilePictureUrl)}
-                alt=""
-              />
-            ) : null}
+            <img
+              className="org-avatar-preview"
+              src={resolveProfilePictureUrl(profile?.profilePictureUrl)}
+              alt=""
+              onError={(event) => {
+                const fallbackUrl = resolveProfilePictureUrl()
+                if (event.currentTarget.src !== fallbackUrl) {
+                  event.currentTarget.src = fallbackUrl
+                }
+              }}
+            />
             <label className="org-upload">
               Upload image
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} />
