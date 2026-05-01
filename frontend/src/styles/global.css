@@ -905,8 +905,10 @@ h2 {
   line-height: 1.55;
 }
 
+.admin-row-actions .taxonomy-action-button,
 .taxonomy-action-button {
   border-radius: 12px;
+  padding-inline: 18px;
 }
 
 .taxonomy-list {
