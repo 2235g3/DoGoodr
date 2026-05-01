@@ -96,6 +96,10 @@ public class OrganisationProfileService {
         OrganisationProfile organisationProfile = organisationRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organisation profile not found for user id: " + userId));
 
+        if (organisationProfile.getProfilePictureUrl() != null && !organisationProfile.getProfilePictureUrl().isBlank()) {
+            fileUploadService.deleteFile(organisationProfile.getProfilePictureUrl());
+        }
+
         String storedFileUrl = fileUploadService.uploadProfilePicture(file, userId);
         organisationProfile.setProfilePictureUrl(storedFileUrl);
         organisationRepository.save(organisationProfile);
