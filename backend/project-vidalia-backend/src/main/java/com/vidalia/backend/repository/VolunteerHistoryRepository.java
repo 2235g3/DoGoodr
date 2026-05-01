@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface VolunteerHistoryRepository extends JpaRepository<VolunteerHistory, Long> {
     List<VolunteerHistory> findAllByVolunteerProfileId(UUID volunteerId);
+
+    List<VolunteerHistory> findAllByOpportunityId(UUID opportunityId);
+
+    boolean existsByVolunteerProfileIdAndOpportunityId(UUID volunteerId, UUID opportunityId);
 }

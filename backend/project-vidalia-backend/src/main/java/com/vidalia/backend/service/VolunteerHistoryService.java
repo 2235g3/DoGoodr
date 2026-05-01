@@ -3,6 +3,7 @@ package com.vidalia.backend.service;
 import com.vidalia.backend.dto.notification.CreateNotificationDTO;
 import com.vidalia.backend.dto.volunteerHistory.*;
 import com.vidalia.backend.exceptions.ForbiddenRequestException;
+import com.vidalia.backend.exceptions.ResourceAlreadyExistsException;
 import com.vidalia.backend.exceptions.ResourceNotFoundException;
 import com.vidalia.backend.mapper.VolunteerHistoryMapper;
 import com.vidalia.backend.model.*;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,7 +37,7 @@ public class VolunteerHistoryService {
     @Transactional(readOnly = true)
     public List<VolunteerHistoryResponseDTO> getVolunteerHistoryForVolunteer(UUID volunteerId) {
         //Get the volunteer
-        VolunteerProfile volunteer = volunteerProfileRepository.findById(volunteerId)
+        volunteerProfileRepository.findById(volunteerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Volunteer not found with id: " + volunteerId));
 
         //Get the volunteer history entries for the volunteer
@@ -54,9 +56,7 @@ public class VolunteerHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + opportunityId + " for organisation with id: " + organisationId));
 
         //Get the volunteer history entries for the opportunity
-        List<VolunteerHistory> volunteerHistoryEntries = volunteerHistoryRepository.findAll().stream()
-                .filter(vh -> vh.getOpportunity() != null && vh.getOpportunity().getId().equals(opportunityId))
-                .toList();
+        List<VolunteerHistory> volunteerHistoryEntries = volunteerHistoryRepository.findAllByOpportunityId(opportunityId);
         //Map the volunteer history entries to DTOs
         return volunteerHistoryEntries.stream()
                 .map(volunteerHistoryMapper::toDTO)
@@ -66,16 +66,26 @@ public class VolunteerHistoryService {
 
     @Transactional
     public VolunteerHistoryResponseDTO createVolunteerHistoryEntry(CreateVolunteerHistoryDTO dto, UUID organisationId, UUID volunteerId) {
+        validateDateRange(dto.getStartDate(), dto.getEndDate());
+
         //Verify that the opportunity exists and belongs to this organisation
         opportunityRepository.findByIdAndOrganisationProfileId(dto.getOpportunityId(), organisationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity not found with id: " + dto.getOpportunityId() + " for organisation with id: " + organisationId));
 
-        //Verify that this volunteer has an accepted application for this opportunity
-        List<Application> application = applicationRepository.findAllByVolunteerProfileId(volunteerId);
-        boolean hasApprovedApplication = application.stream()
-                .anyMatch(app -> app.getOpportunity().getId().equals(dto.getOpportunityId()) && app.getStatus() == ApplicationStatus.ACCEPTED);
+        if (volunteerHistoryRepository.existsByVolunteerProfileIdAndOpportunityId(volunteerId, dto.getOpportunityId())) {
+            throw new ResourceAlreadyExistsException("Volunteer history already exists for this volunteer and opportunity");
+        }
 
-        if (!hasApprovedApplication) {
+        //Verify that this volunteer has an accepted application for this opportunity
+        List<Application> applications = applicationRepository.findAllByVolunteerProfileId(volunteerId);
+        Application acceptedApplication = applications.stream()
+                .filter(app -> app.getOpportunity() != null
+                        && app.getOpportunity().getId().equals(dto.getOpportunityId())
+                        && app.getStatus() == ApplicationStatus.ACCEPTED)
+                .findFirst()
+                .orElse(null);
+
+        if (acceptedApplication == null) {
             throw new ForbiddenRequestException("Volunteer with id: " + volunteerId + " does not have an accepted application for opportunity with id: " + dto.getOpportunityId());
         }
 
@@ -89,6 +99,8 @@ public class VolunteerHistoryService {
         VolunteerHistory history = volunteerHistoryMapper.toEntity(dto);
         history.setVolunteerProfile(volunteer);
         history.setOpportunity(opportunity);
+        acceptedApplication.setStatus(ApplicationStatus.COMPLETED);
+        applicationRepository.save(acceptedApplication);
         sendCreatedNotificationToVolunteer(history);
         VolunteerHistory savedHistory = volunteerHistoryRepository.save(history);
         return volunteerHistoryMapper.toDTO(savedHistory);
@@ -96,6 +108,8 @@ public class VolunteerHistoryService {
 
     @Transactional
     public VolunteerHistoryResponseDTO updateDateRange(long logId, UUID organisationId, UpdateVolunteerHistoryDateRangeDTO dto) {
+        validateDateRange(dto.getStartDate(), dto.getEndDate());
+
         //Verify that the volunteer history entry exists and belongs to an opportunity of this organisation
         VolunteerHistory history = verifyVolunteerHistoryExistenceAndOwnership(logId, organisationId);
 
@@ -125,10 +139,12 @@ public class VolunteerHistoryService {
         VolunteerHistory history = verifyVolunteerHistoryExistenceAndOwnership(logId, organisationId);
 
         //Update the volunteered hours
-        history.setHoursLogged(history.getHoursLogged() + dto.getHours());
+        double previousHours = history.getHoursLogged();
+        int previousPoints = history.getPointsEarned();
+        history.setHoursLogged(previousHours + dto.getHours());
         //Recalculate points based on the new total hours
         int newPoints = calculatePoints(history.getHoursLogged());
-        updateVolunteerPoints(history, newPoints);
+        updateVolunteerTotals(history, previousHours, newPoints - previousPoints);
         history.setPointsEarned(newPoints);
         sendUpdateNotificationToVolunteer(history);
         VolunteerHistory updatedHistory = volunteerHistoryRepository.save(history);
@@ -149,12 +165,20 @@ public class VolunteerHistoryService {
         return (int) (hours * 10);
     }
 
-    private void updateVolunteerPoints(VolunteerHistory history, int newPoints) {
+    private void updateVolunteerTotals(VolunteerHistory history, double previousHours, int pointsDelta) {
         VolunteerProfile volunteer = history.getVolunteerProfile();
-        int currentPoints = volunteer.getPointsBalance();
-        int updatedPoints = currentPoints + newPoints;
-        volunteer.setPointsBalance(updatedPoints);
+        int currentPoints = volunteer.getPointsBalance() == null ? 0 : volunteer.getPointsBalance();
+        int currentTotalHours = volunteer.getTotalHours() == null ? 0 : volunteer.getTotalHours();
+        int completedWholeHoursDelta = (int) Math.floor(history.getHoursLogged()) - (int) Math.floor(previousHours);
+        volunteer.setPointsBalance(currentPoints + pointsDelta);
+        volunteer.setTotalHours(currentTotalHours + completedWholeHoursDelta);
         volunteerProfileRepository.save(volunteer);
+    }
+
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null && endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
     }
 
     private void sendCreatedNotificationToVolunteer(VolunteerHistory history) {
