@@ -87,16 +87,22 @@ Important decisions:
 Primary journey:
 
 1. Register or log in.
-2. Complete or update profile.
-3. Browse matched or searchable opportunities.
-4. View opportunity details.
-5. Apply.
-6. Track application status and volunteering history.
+2. After registration, enter an optional onboarding flow that completes profile details, location preferences, remote-only preference, CV/photo fields, and self-assigned labels.
+3. If onboarding is skipped or incomplete, land on the volunteer dashboard with a persistent reminder that a complete profile unlocks better recommendations.
+4. Browse/search opportunities and organisations as the main product action, using a search experience inspired by LinkedIn job search and Rightmove property search: list, rich cards, filters, sorting, and map context.
+5. Save or update location from browser geolocation, or manually enter a location and coordinates. Remote-only remains a profile preference that can be changed later.
+6. Apply to opportunities from browse/search/detail cards.
+7. Once the volunteer profile is complete, use the matching service as a higher-confidence recommendations area.
+8. Track applications, notifications, and volunteering history.
+9. Share volunteering history externally through native share links and LinkedIn-style share URLs.
 
 Important decisions:
 
-- TODO: Should volunteers land on matches, search, profile completion, or a dashboard?
-- TODO: Should profile completion block applying?
+- Volunteers should land on the dashboard after login. The dashboard becomes the command center and surfaces onboarding reminders.
+- Profile completion should unlock matching, but it should not block browsing or applying.
+- Opportunity discovery is the primary volunteer workflow. Matching is a premium/recommendation layer on top of browsing, not the only feed.
+- Use OpenStreetMap/embedded map links first because it avoids API key setup and is enough for coursework UX. Google Maps can replace it later if the product needs richer map interactions.
+- Use browser geolocation for current-location capture. The user can save coordinates into their profile or enter them manually.
 
 ### Organisation
 
@@ -140,8 +146,9 @@ Routes are provisional until confirmed.
 | `/register/volunteer` | Public | Volunteer registration | Proposed |
 | `/register/organisation` | Public | Organisation registration | Proposed |
 | `/volunteer` | Volunteer | Volunteer dashboard | Proposed |
+| `/volunteer/onboarding` | Volunteer | Guided profile completion and label selection | Proposed |
 | `/volunteer/profile` | Volunteer | Profile editor | Proposed |
-| `/volunteer/opportunities` | Volunteer | Browse/search opportunities | Proposed |
+| `/volunteer/browse` | Volunteer | Browse/search opportunities and organisations with map context | Proposed |
 | `/volunteer/opportunities/:id` | Volunteer | Opportunity detail | Proposed |
 | `/volunteer/applications` | Volunteer | Application tracking | Proposed |
 | `/volunteer/history` | Volunteer | Volunteering history | Proposed |
@@ -187,27 +194,37 @@ Open backend questions:
 
 ### Volunteer Dashboard
 
-Goal: TODO
+Goal: Give the volunteer a quick read on profile completeness, applications, matches, and next actions.
 
 Primary content:
 
-- TODO
+- Profile completion reminder and progress.
+- Primary action: browse opportunities.
+- Secondary action: complete onboarding/profile.
+- Stats: points, hours, applications, matches, unread notifications.
+- Clear message that matching unlocks when profile information and labels are complete.
 
 Open decisions:
 
-- TODO
+- Whether matching should require a CV/profile picture, or only profile fields plus labels.
 
 ### Opportunity Browse
 
-Goal: TODO
+Goal: Make opportunity discovery useful even before the matching service is available.
 
 Primary content:
 
-- TODO
+- Search query over opportunity title, description, organisation name, and location.
+- Filters for remote, organisation, required hours, date, status, and distance when coordinates exist.
+- Sorts for newest, start date, closest, hours, and organisation.
+- Results list with apply action and organisation context.
+- Map panel using OpenStreetMap embed or marker links for results with coordinates.
+- Organisation browse alongside opportunities.
 
 Open decisions:
 
-- TODO
+- Whether to persist saved searches.
+- Whether organisations should have dedicated public profile pages.
 
 ### Organisation Dashboard
 
@@ -332,6 +349,8 @@ Record decisions here as they are made.
 | --- | --- | --- | --- |
 | 2026-04-30 | Build the new frontend from scratch in `frontend-new/`. | Backend + technical lead | Avoid coupling to the current unfinished frontend. |
 | 2026-04-30 | Treat Codex as frontend lead and user as backend + technical lead. | Both | Keeps implementation ownership and product guidance clear. |
+| 2026-05-01 | Volunteer discovery becomes browse/search first, with matching unlocked by profile completion. | Backend + technical lead | Volunteers need a useful app before the recommendation data is complete; matching should reward richer profiles without blocking core use. |
+| 2026-05-01 | Use OpenStreetMap and browser geolocation for the first map/location implementation. | Frontend lead | Avoids API-key setup and keeps the coursework build portable. |
 
 ## 10. Open Questions
 
@@ -343,6 +362,8 @@ Questions that block design or implementation should live here until resolved.
 | Should the app have a public marketing-style landing page, or should `/` route users quickly into login/register? | Public UX | Medium | Open |
 | What visual references or comparable products should guide the design? | Visual direction | Medium | Open |
 | What deadline or coursework milestone should the frontend plan optimize for? | Implementation sequencing | High | Open |
+| Should profile completion require a CV and profile picture, or only core fields and labels? | Matching gate | Medium | Open |
+| Should social sharing create a public share page, or only prefilled share intents for now? | Volunteer history sharing | Medium | Open |
 
 ## 11. Implementation Phases
 
