@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/auth/**", "/", webSocketProperties.getEndpoint(), webSocketProperties.getEndpoint() + "/**").permitAll()
                         .anyRequest().authenticated()
                 )

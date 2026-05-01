@@ -61,16 +61,56 @@ export type UserResponseDTO = {
   createdAt: string
 }
 
-export type ErrorResponse = {
-  timestamp?: string
-  status?: number
-  message?: string
-  path?: string
-  details?: string
-  fieldErrors?: Record<string, string>
+export type CreateUserDTO = {
+  email: string
+  password: string
+  role: Role
 }
 
-export type OProfileResponseDTO = {
+export type UpdateUserDTO = {
+  email?: string | null
+  secondaryEmail?: string | null
+  phoneNumber?: string | null
+}
+
+export type UpdateUserPasswordDTO = {
+  oldPassword: string
+  newPassword: string
+}
+
+export type VolunteerProfileDTO = {
+  id: string
+  forename: string
+  surname?: string | null
+  preferredName: string
+  profilePictureUrl?: string | null
+  cvUrl?: string | null
+  contactEmail?: string | null
+  location?: string | null
+  profileDescription?: string | null
+  longitude?: number | null
+  latitude?: number | null
+  maxTravelDistance?: number | null
+  remoteOnly: boolean
+  totalHours?: number | null
+  availability?: string | null
+  dateOfBirth: string
+  lastUpdated: string
+  pointsBalance?: number | null
+}
+
+export type UpdateVolunteerProfileDTO = {
+  forename?: string | null
+  surname?: string | null
+  preferredName?: string | null
+  contactEmail?: string | null
+  location?: string | null
+  profileDescription?: string | null
+  maxTravelDistance?: number | null
+  availability?: string | null
+}
+
+export type OrganisationProfileDTO = {
   id: string
   displayName: string
   profilePictureUrl?: string | null
@@ -79,6 +119,8 @@ export type OProfileResponseDTO = {
   location?: string | null
   websiteUrl?: string | null
 }
+
+export type OProfileResponseDTO = OrganisationProfileDTO
 
 export type UpdateOrganisationProfileDTO = {
   displayName?: string | null
@@ -89,7 +131,7 @@ export type UpdateOrganisationProfileDTO = {
   websiteUrl?: string | null
 }
 
-export type OpportunityResponseDTO = {
+export type OpportunityDTO = {
   id: string
   title: string
   description: string
@@ -107,8 +149,10 @@ export type OpportunityResponseDTO = {
   capacity?: number | null
   dateCreated: string
   lastUpdated: string
-  organisationProfile: OProfileResponseDTO
+  organisationProfile: OrganisationProfileDTO
 }
+
+export type OpportunityResponseDTO = OpportunityDTO
 
 export type CreateOpportunityDTO = {
   title: string
@@ -129,19 +173,32 @@ export type CreateOpportunityDTO = {
 
 export type UpdateOpportunityDTO = Partial<CreateOpportunityDTO>
 
-export type ApplicationResponseDTO = {
+export type ApplicationDTO = {
   id: string
   volunteerId: string
   volunteerName: string
   opportunityId: string
   opportunityName: string
   message: string
-  status: ApplicationStatus
+  status: ApplicationStatus | string
   dateApplied: string
   decisionDate?: string | null
 }
 
-export type NotificationResponseDTO = {
+export type ApplicationResponseDTO = ApplicationDTO
+
+export type CreateApplicationDTO = {
+  message: string
+}
+
+export type MatchedOpportunityDTO = {
+  opportunity: OpportunityDTO
+  finalScore: number
+  normalizedScore?: number | null
+  distanceKm?: number | null
+}
+
+export type NotificationDTO = {
   id: string
   type: NotificationType
   message: string
@@ -149,7 +206,9 @@ export type NotificationResponseDTO = {
   read: boolean
 }
 
-export type VolunteerHistoryResponseDTO = {
+export type NotificationResponseDTO = NotificationDTO
+
+export type VolunteerHistoryDTO = {
   volunteerId: string
   volunteerName: string
   opportunityId: string
@@ -163,8 +222,19 @@ export type VolunteerHistoryResponseDTO = {
   organisationComment?: string | null
 }
 
+export type VolunteerHistoryResponseDTO = VolunteerHistoryDTO
+
 export type CreateVolunteerHistoryDTO = {
   opportunityId: string
   startDate: string
   endDate: string
+}
+
+export type ErrorResponse = {
+  timestamp?: string
+  status?: number
+  message?: string
+  path?: string
+  details?: string
+  fieldErrors?: Record<string, string>
 }

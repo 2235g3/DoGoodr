@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -124,15 +126,8 @@ public class FileUploadService {
         }
 
         try {
-            String fileName = extractFileNameFromUrl(fileUrl);
-            if (fileName == null || fileName.isBlank()) {
-                return;
-            }
-
-            Path filePath = Path.of(fileUploadProperties.getRootDir()).toAbsolutePath().normalize()
-                    .resolve(fileName).normalize();
-
-            if (!filePath.startsWith(Path.of(fileUploadProperties.getRootDir()).toAbsolutePath().normalize())) {
+            Path filePath = resolveStoredFilePath(fileUrl);
+            if (filePath == null) {
                 return;
             }
 
@@ -142,16 +137,67 @@ public class FileUploadService {
         }
     }
 
-    private String extractFileNameFromUrl(String fileUrl) {
-        if (fileUrl == null || fileUrl.isBlank()) {
+    private Path resolveStoredFilePath(String fileUrl) {
+        String urlPath = extractPathFromUrl(fileUrl);
+        Path profilePicturePath = resolvePathForPrefix(
+                urlPath,
+                fileUploadProperties.getProfilePicturesUrlPrefix(),
+                fileUploadProperties.getProfilePicturesDir()
+        );
+        if (profilePicturePath != null) {
+            return profilePicturePath;
+        }
+
+        return resolvePathForPrefix(
+                urlPath,
+                fileUploadProperties.getCvUrlPrefix(),
+                fileUploadProperties.getCvDir()
+        );
+    }
+
+    private Path resolvePathForPrefix(String urlPath, String urlPrefix, String directory) {
+        String normalizedPrefix = normalizeUrlPrefix(urlPrefix);
+        String normalizedPath = normalizeUrlPath(urlPath);
+        String prefixWithSlash = normalizedPrefix + "/";
+
+        if (!normalizedPath.startsWith(prefixWithSlash)) {
             return null;
         }
 
-        int lastSlash = fileUrl.lastIndexOf('/');
-        if (lastSlash < 0 || lastSlash == fileUrl.length() - 1) {
+        String relativeFileName = normalizedPath.substring(prefixWithSlash.length());
+        if (relativeFileName.isBlank() || relativeFileName.contains("/")) {
             return null;
         }
 
-        return fileUrl.substring(lastSlash + 1);
+        Path baseDir = Path.of(directory).toAbsolutePath().normalize();
+        Path filePath = baseDir.resolve(relativeFileName).normalize();
+        if (!filePath.startsWith(baseDir)) {
+            return null;
+        }
+
+        return filePath;
+    }
+
+    private String extractPathFromUrl(String fileUrl) {
+        try {
+            return new URI(fileUrl).getPath();
+        } catch (IllegalArgumentException | URISyntaxException exception) {
+            return fileUrl;
+        }
+    }
+
+    private String normalizeUrlPrefix(String urlPrefix) {
+        String normalizedPrefix = normalizeUrlPath(urlPrefix);
+        if (normalizedPrefix.endsWith("/")) {
+            return normalizedPrefix.substring(0, normalizedPrefix.length() - 1);
+        }
+        return normalizedPrefix;
+    }
+
+    private String normalizeUrlPath(String urlPath) {
+        if (urlPath == null || urlPath.isBlank()) {
+            return "";
+        }
+        return urlPath.startsWith("/") ? urlPath : "/" + urlPath;
     }
 }
