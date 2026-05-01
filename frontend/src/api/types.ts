@@ -228,8 +228,26 @@ export type LabelDTO = {
   type: LabelType
 }
 
+export type CreateLabelDTO = {
+  name: string
+  semanticTag?: { id: number; name: string } | null
+  required: boolean
+  type: LabelType
+}
+
 export type AssignedLabelDTO = {
   labelId: number
+  weight: number
+}
+
+export type SemanticTagDTO = {
+  id?: number
+  name: string
+}
+
+export type SemanticLinkDTO = {
+  one: { id: number; name: string }
+  two: { id: number; name: string }
   weight: number
 }
 

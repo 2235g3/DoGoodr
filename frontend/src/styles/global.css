@@ -667,7 +667,7 @@ h2 {
 
 .admin-stat-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -891,6 +891,43 @@ h2 {
   color: #743232;
   background: #fff1ed;
   border-color: rgba(135, 56, 56, 0.22);
+}
+
+.taxonomy-stat-grid {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+.taxonomy-relationship-form p {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.taxonomy-list {
+  display: grid;
+  gap: 10px;
+}
+
+.taxonomy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--white);
+}
+
+.taxonomy-row strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.taxonomy-row span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .volunteer-page {
@@ -1394,6 +1431,7 @@ h2 {
   .admin-grid-three,
   .admin-action-grid,
   .admin-card-grid,
+  .taxonomy-stat-grid,
   .onboarding-grid,
   .browse-search-panel,
   .browse-filter-row,
@@ -1419,6 +1457,11 @@ h2 {
 
   .browse-map-panel {
     position: static;
+  }
+
+  .taxonomy-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .volunteer-profile-card {

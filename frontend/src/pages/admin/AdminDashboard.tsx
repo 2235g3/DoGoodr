@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   getAdminApplications,
+  getAdminLabels,
   getAdminOpportunities,
   getAdminOrganisationProfiles,
+  getAdminSemanticTags,
   getAdminUsers,
   getAdminVolunteerProfiles,
 } from '../../api/admin'
@@ -15,6 +17,8 @@ type DashboardStats = {
   organisations: number
   opportunities: number
   applications: number
+  labels: number
+  semanticTags: number
 }
 
 export function AdminDashboard() {
@@ -30,8 +34,10 @@ export function AdminDashboard() {
       getAdminOrganisationProfiles(),
       getAdminOpportunities(),
       getAdminApplications(),
+      getAdminLabels(),
+      getAdminSemanticTags(),
     ])
-      .then(([users, volunteers, organisations, opportunities, applications]) => {
+      .then(([users, volunteers, organisations, opportunities, applications, labels, semanticTags]) => {
         if (!isMounted) return
         setStats({
           users: users.length,
@@ -39,6 +45,8 @@ export function AdminDashboard() {
           organisations: organisations.length,
           opportunities: opportunities.length,
           applications: applications.length,
+          labels: labels.length,
+          semanticTags: semanticTags.length,
         })
       })
       .catch((caughtError) => {
@@ -67,6 +75,8 @@ export function AdminDashboard() {
         <StatCard label="Organisations" value={stats?.organisations} to="/admin/profiles" />
         <StatCard label="Opportunities" value={stats?.opportunities} to="/admin/opportunities" />
         <StatCard label="Applications" value={stats?.applications} to="/admin/applications" />
+        <StatCard label="Labels" value={stats?.labels} to="/admin/taxonomy" />
+        <StatCard label="Semantic tags" value={stats?.semanticTags} to="/admin/taxonomy" />
       </div>
 
       <div className="admin-panel">
@@ -74,6 +84,7 @@ export function AdminDashboard() {
         <div className="admin-action-grid">
           <Link to="/admin/profiles">Review organisation verification</Link>
           <Link to="/admin/users">Search users by email or role</Link>
+          <Link to="/admin/taxonomy">Maintain matching taxonomy</Link>
           <Link to="/admin/history">Look up volunteer history records</Link>
         </div>
       </div>

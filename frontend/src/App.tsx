@@ -20,6 +20,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AdminHistoryPage } from './pages/admin/AdminHistoryPage'
 import { AdminOpportunitiesPage } from './pages/admin/AdminOpportunitiesPage'
 import { AdminProfilesPage } from './pages/admin/AdminProfilesPage'
+import { AdminTaxonomyPage } from './pages/admin/AdminTaxonomyPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { VolunteerAccountPage } from './pages/volunteer/VolunteerAccountPage'
 import { VolunteerApplicationsPage } from './pages/volunteer/VolunteerApplicationsPage'
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="opportunities" element={<AdminOpportunitiesPage />} />
         <Route path="applications" element={<AdminApplicationsPage />} />
         <Route path="history" element={<AdminHistoryPage />} />
+        <Route path="taxonomy" element={<AdminTaxonomyPage />} />
       </Route>
     </Routes>
   )
