@@ -146,11 +146,14 @@ input:focus-visible {
 
 .eyebrow::before {
   content: "";
-  width: 9px;
+  flex: 0 0 41px;
+  width: 41px;
   height: 9px;
   border-radius: 50%;
-  background: var(--sage);
-  box-shadow: 16px 0 0 var(--eucalyptus), 32px 0 0 var(--ink);
+  background:
+    radial-gradient(circle at 4.5px 4.5px, var(--sage) 0 4.5px, transparent 5px),
+    radial-gradient(circle at 20.5px 4.5px, var(--eucalyptus) 0 4.5px, transparent 5px),
+    radial-gradient(circle at 36.5px 4.5px, var(--ink) 0 4.5px, transparent 5px);
 }
 
 h1,
@@ -900,6 +903,10 @@ h2 {
 .taxonomy-relationship-form p {
   color: var(--ink-soft);
   line-height: 1.55;
+}
+
+.taxonomy-action-button {
+  border-radius: 12px;
 }
 
 .taxonomy-list {

@@ -223,7 +223,7 @@ export function AdminTaxonomyPage() {
             Required for matching
           </label>
           <div className="admin-row-actions">
-            <button className="button button--primary" type="submit">
+            <button className="button button--primary taxonomy-action-button" type="submit">
               {labelForm.id ? 'Update label' : 'Create label'}
             </button>
             {labelForm.id ? (
@@ -241,7 +241,7 @@ export function AdminTaxonomyPage() {
             <input value={tagForm.name} onChange={(event) => setTagForm({ ...tagForm, name: event.target.value })} required />
           </label>
           <div className="admin-row-actions">
-            <button className="button button--primary" type="submit">
+            <button className="button button--primary taxonomy-action-button" type="submit">
               {tagForm.id ? 'Update tag' : 'Create tag'}
             </button>
             {tagForm.id ? (
@@ -292,7 +292,7 @@ export function AdminTaxonomyPage() {
             />
           </label>
         </div>
-        <button className="button button--primary" type="submit">
+        <button className="button button--primary taxonomy-action-button" type="submit">
           Save relationship
         </button>
       </form>
