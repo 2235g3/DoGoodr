@@ -907,6 +907,8 @@ h2 {
 
 .admin-row-actions .taxonomy-action-button,
 .taxonomy-action-button {
+  justify-content: center;
+  min-width: 142px;
   border-radius: 12px;
   padding-inline: 18px;
 }
