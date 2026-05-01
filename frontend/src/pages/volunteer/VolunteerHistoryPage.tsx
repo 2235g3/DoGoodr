@@ -5,6 +5,7 @@ import { VolunteerNotice } from './VolunteerNotice'
 
 export function VolunteerHistoryPage() {
   const [history, setHistory] = useState<VolunteerHistoryDTO[]>([])
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const totals = useMemo(
@@ -29,6 +30,16 @@ export function VolunteerHistoryPage() {
     }
   }
 
+  async function handleShareSummary() {
+    const shareText = `I have logged ${totals.hours} volunteering hours with ${totals.organisations} organisations through DoGoodr.`
+    await shareTextValue(shareText, setMessage)
+  }
+
+  async function handleShareItem(item: VolunteerHistoryDTO) {
+    const shareText = `I volunteered ${item.hoursLogged} hours with ${item.organisationName} on ${item.opportunityTitle}.`
+    await shareTextValue(shareText, setMessage)
+  }
+
   return (
     <>
       <div className="admin-heading">
@@ -37,6 +48,7 @@ export function VolunteerHistoryPage() {
         <p>Review completed volunteering records, logged hours, points, and organisation notes.</p>
       </div>
 
+      {message ? <VolunteerNotice tone="success">{message}</VolunteerNotice> : null}
       {error ? <VolunteerNotice tone="error">{error}</VolunteerNotice> : null}
 
       <div className="admin-stat-grid volunteer-stat-grid">
@@ -54,6 +66,32 @@ export function VolunteerHistoryPage() {
         </div>
       </div>
 
+      <section className="admin-panel history-share-panel">
+        <div>
+          <p className="eyebrow">Share your impact</p>
+          <h3>Turn your volunteering record into an experience update.</h3>
+          <p>
+            Share a summary directly from your browser, or open a LinkedIn share intent with your
+            volunteering highlights.
+          </p>
+        </div>
+        <div className="admin-row-actions">
+          <button className="button button--primary" type="button" onClick={handleShareSummary}>
+            Share summary
+          </button>
+          <a
+            className="button button--secondary"
+            href={makeLinkedInShareUrl(
+              `I have logged ${totals.hours} volunteering hours with ${totals.organisations} organisations through DoGoodr.`,
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            LinkedIn
+          </a>
+        </div>
+      </section>
+
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
@@ -64,6 +102,7 @@ export function VolunteerHistoryPage() {
               <th>Hours</th>
               <th>Points</th>
               <th>Comment</th>
+              <th>Share</th>
             </tr>
           </thead>
           <tbody>
@@ -80,6 +119,22 @@ export function VolunteerHistoryPage() {
                 <td>{item.hoursLogged}</td>
                 <td>{item.pointsGained}</td>
                 <td>{item.organisationComment || '...'}</td>
+                <td>
+                  <div className="admin-row-actions">
+                    <button type="button" onClick={() => handleShareItem(item)}>
+                      Share
+                    </button>
+                    <a
+                      href={makeLinkedInShareUrl(
+                        `I volunteered ${item.hoursLogged} hours with ${item.organisationName} on ${item.opportunityTitle}.`,
+                      )}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      LinkedIn
+                    </a>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -87,6 +142,28 @@ export function VolunteerHistoryPage() {
       </div>
     </>
   )
+}
+
+async function shareTextValue(text: string, onShared: (message: string) => void) {
+  if (navigator.share) {
+    await navigator.share({
+      title: 'My DoGoodr volunteering experience',
+      text,
+      url: window.location.origin,
+    })
+    onShared('Share sheet opened.')
+    return
+  }
+
+  await navigator.clipboard.writeText(text)
+  onShared('Share text copied to clipboard.')
+}
+
+function makeLinkedInShareUrl(text: string) {
+  const url = new URL('https://www.linkedin.com/sharing/share-offsite/')
+  url.searchParams.set('url', window.location.origin)
+  url.searchParams.set('summary', text)
+  return url.toString()
 }
 
 function formatDate(value?: string | null) {

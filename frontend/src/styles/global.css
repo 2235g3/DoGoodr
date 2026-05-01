@@ -814,8 +814,11 @@ h2 {
 }
 
 .admin-row-actions button,
+.admin-row-actions a,
 .admin-record-card button {
   min-height: 36px;
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0 12px;
@@ -1210,6 +1213,18 @@ h2 {
   line-height: 1.5;
 }
 
+.history-share-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.history-share-panel p {
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
 .volunteer-profile-card {
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
@@ -1392,8 +1407,14 @@ h2 {
 
   .volunteer-completion-card,
   .onboarding-progress-panel,
-  .browse-unlock-card {
+  .browse-unlock-card,
+  .history-share-panel {
     grid-template-columns: 1fr;
+  }
+
+  .history-share-panel {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .browse-map-panel {
