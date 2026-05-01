@@ -9,6 +9,12 @@ import {
   uploadVolunteerProfilePicture,
 } from '../../api/volunteer'
 import type { VolunteerProfileDTO } from '../../api/types'
+import {
+  availabilityOptions,
+  formatAvailability,
+  hasAvailability,
+  toggleAvailability,
+} from '../../utils/availability'
 import { VolunteerNotice } from './VolunteerNotice'
 
 type ProfileForm = {
@@ -183,13 +189,26 @@ export function VolunteerProfilePage() {
             />
             Remote only
           </label>
-          <label>
-            Availability
-            <input
-              value={form.availability}
-              onChange={(event) => updateField('availability', event.target.value)}
-            />
-          </label>
+          <fieldset className="availability-fieldset">
+            <legend>Availability</legend>
+            <div className="availability-options">
+              {availabilityOptions.map((option) => (
+                <label className="volunteer-toggle" key={option.value}>
+                  <input
+                    checked={hasAvailability(form.availability, option.value)}
+                    type="checkbox"
+                    onChange={(event) =>
+                      updateField(
+                        'availability',
+                        toggleAvailability(form.availability, option.value, event.target.checked),
+                      )
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <label>
             Profile description
             <textarea
@@ -206,11 +225,16 @@ export function VolunteerProfilePage() {
         <section className="admin-panel admin-form">
           <h3>Files and matching data</h3>
           <div className="volunteer-profile-card">
-            {profile?.profilePictureUrl ? (
-              <img src={resolveMediaUrl(profile.profilePictureUrl)} alt="" />
-            ) : (
-              <div className="volunteer-avatar-fallback">{profile?.preferredName?.slice(0, 1) ?? 'D'}</div>
-            )}
+            <img
+              src={resolveProfilePictureUrl(profile?.profilePictureUrl)}
+              alt=""
+              onError={(event) => {
+                const fallbackUrl = resolveProfilePictureUrl()
+                if (event.currentTarget.src !== fallbackUrl) {
+                  event.currentTarget.src = fallbackUrl
+                }
+              }}
+            />
             <div>
               <strong>{profile?.preferredName || profile?.forename || 'Volunteer'}</strong>
               <p>{profile?.profileDescription || 'No profile description yet.'}</p>
@@ -273,6 +297,10 @@ export function VolunteerProfilePage() {
               <dd>{profile?.remoteOnly ? 'Yes' : 'No'}</dd>
             </div>
             <div>
+              <dt>Availability</dt>
+              <dd>{formatAvailability(profile?.availability)}</dd>
+            </div>
+            <div>
               <dt>Total hours</dt>
               <dd>{profile?.totalHours ?? 0}</dd>
             </div>
@@ -323,4 +351,8 @@ function resolveMediaUrl(value: string) {
   }
 
   return `${API_BASE_URL}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+function resolveProfilePictureUrl(value?: string | null) {
+  return resolveMediaUrl(value || '/uploads/profile-pictures/default-profile-picture.png')
 }

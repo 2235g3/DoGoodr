@@ -1,8 +1,10 @@
 import { apiRequest } from './client'
 import type {
+  AssignedLabelDTO,
   ApplicationResponseDTO,
   ApplicationStatus,
   CreateOpportunityDTO,
+  LabelDTO,
   CreateVolunteerHistoryDTO,
   NotificationResponseDTO,
   OProfileResponseDTO,
@@ -105,6 +107,33 @@ export function deleteOpportunity(token: string, opportunityId: string) {
   return apiRequest<void>(
     `/api/opportunities/${opportunityId}`,
     { method: 'DELETE' },
+    { token },
+  )
+}
+
+export function getLabels(token: string) {
+  return apiRequest<LabelDTO[]>('/api/labels', { method: 'GET' }, { token })
+}
+
+export function getOpportunityLabels(token: string, opportunityId: string) {
+  return apiRequest<AssignedLabelDTO[]>(
+    `/api/labels/opportunity/${opportunityId}`,
+    { method: 'GET' },
+    { token },
+  )
+}
+
+export function setOpportunityLabels(
+  token: string,
+  opportunityId: string,
+  labels: AssignedLabelDTO[],
+) {
+  return apiRequest<AssignedLabelDTO[]>(
+    `/api/labels/opportunity/${opportunityId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(labels),
+    },
     { token },
   )
 }

@@ -14,6 +14,7 @@ import type {
   OrganisationProfileDTO,
   VolunteerProfileDTO,
 } from '../../api/types'
+import { formatAvailability } from '../../utils/availability'
 import { calculateVolunteerProfileCompletion } from '../../utils/volunteerProfile'
 import { VolunteerNotice } from './VolunteerNotice'
 
@@ -40,6 +41,7 @@ export function VolunteerMatchesPage() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isGeneratingMatches, setIsGeneratingMatches] = useState(false)
   const [isLocating, setIsLocating] = useState(false)
   const [canUseMatches, setCanUseMatches] = useState(false)
 
@@ -66,9 +68,7 @@ export function VolunteerMatchesPage() {
         setOrganisations(nextOrganisations)
         setOpportunities(nextOpportunities)
 
-        if (completion.complete) {
-          setMatches(await getVolunteerMatches().catch(() => []))
-        }
+        if (completion.complete) await generateMatches()
       })
       .catch((caughtError) => {
         if (!isMounted) return
@@ -108,6 +108,25 @@ export function VolunteerMatchesPage() {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to search opportunities.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  async function generateMatches() {
+    setError('')
+    setNotice('')
+    setIsGeneratingMatches(true)
+    try {
+      const nextMatches = await getVolunteerMatches()
+      setMatches(nextMatches)
+      setNotice(
+        nextMatches.length
+          ? `Generated ${nextMatches.length} matched ${nextMatches.length === 1 ? 'opportunity' : 'opportunities'}.`
+          : 'No matched opportunities yet. Try broadening your labels, availability, or travel preferences.',
+      )
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Unable to generate matches.')
+    } finally {
+      setIsGeneratingMatches(false)
     }
   }
 
@@ -295,23 +314,47 @@ export function VolunteerMatchesPage() {
             Complete profile
           </a>
         </section>
-      ) : matches.length ? (
+      ) : (
         <section className="admin-panel">
-          <h3>Recommended for you</h3>
-          <div className="browse-match-strip">
-            {matches.slice(0, 4).map((match) => (
-              <OpportunityCard
-                key={match.opportunity.id}
-                opportunity={match.opportunity}
-                match={match}
-                message={messages[match.opportunity.id] ?? ''}
-                onMessageChange={updateMessage}
-                onApply={handleApply}
-              />
-            ))}
+          <div className="browse-match-heading">
+            <div>
+              <p className="eyebrow">Matching service</p>
+              <h3>Recommended for you</h3>
+              <p>
+                Generate a ranked feed using your labels, availability, remote preference, age, and
+                travel distance.
+              </p>
+            </div>
+            <button
+              className="button button--primary"
+              type="button"
+              disabled={isGeneratingMatches}
+              onClick={generateMatches}
+            >
+              {isGeneratingMatches ? 'Generating...' : 'Generate matches'}
+            </button>
           </div>
+          {matches.length ? (
+            <div className="browse-match-strip">
+              {matches.slice(0, 4).map((match) => (
+                <OpportunityCard
+                  key={match.opportunity.id}
+                  opportunity={match.opportunity}
+                  match={match}
+                  message={messages[match.opportunity.id] ?? ''}
+                  onMessageChange={updateMessage}
+                  onApply={handleApply}
+                />
+              ))}
+            </div>
+          ) : (
+            <VolunteerNotice>
+              No generated matches are showing yet. Opportunities need matching labels and at least
+              one compatible availability slot to score strongly.
+            </VolunteerNotice>
+          )}
         </section>
-      ) : null}
+      )}
 
       <div className="browse-results-layout">
         <section className="browse-results-column">
@@ -424,6 +467,10 @@ function OpportunityCard({
         <div>
           <dt>Hours</dt>
           <dd>{opportunity.requiredHours ?? 'Flexible'}</dd>
+        </div>
+        <div>
+          <dt>Availability</dt>
+          <dd>{formatAvailability(opportunity.availability)}</dd>
         </div>
       </dl>
       <textarea

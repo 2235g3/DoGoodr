@@ -3,11 +3,15 @@ package com.vidalia.backend.controller.label;
 import com.vidalia.backend.dto.label.AssignedLabelDTO;
 import com.vidalia.backend.dto.label.CreateLabelDTO;
 import com.vidalia.backend.dto.label.LabelDTO;
+import com.vidalia.backend.dto.profile.OProfileResponseDTO;
 import com.vidalia.backend.dto.profile.VProfileResponseDTO;
+import com.vidalia.backend.model.Role;
 import com.vidalia.backend.model.matchmaking.LabelType;
 import com.vidalia.backend.security.CustomUserDetails;
 import com.vidalia.backend.service.LabelAssignmentService;
 import com.vidalia.backend.service.LabelManagementService;
+import com.vidalia.backend.service.OpportunityService;
+import com.vidalia.backend.service.OrganisationProfileService;
 import com.vidalia.backend.service.VolunteerProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,13 +38,19 @@ public class LabelController {
     private final LabelManagementService labelManagementService;
     private final LabelAssignmentService labelAssignmentService;
     private final VolunteerProfileService volunteerProfileService;
+    private final OrganisationProfileService organisationProfileService;
+    private final OpportunityService opportunityService;
 
     public LabelController(LabelManagementService labelManagementService,
                            LabelAssignmentService labelAssignmentService,
-                           VolunteerProfileService volunteerProfileService) {
+                           VolunteerProfileService volunteerProfileService,
+                           OrganisationProfileService organisationProfileService,
+                           OpportunityService opportunityService) {
         this.labelManagementService = labelManagementService;
         this.labelAssignmentService = labelAssignmentService;
         this.volunteerProfileService = volunteerProfileService;
+        this.organisationProfileService = organisationProfileService;
+        this.opportunityService = opportunityService;
     }
 
     @GetMapping
@@ -91,8 +101,38 @@ public class LabelController {
         return ResponseEntity.ok(labelAssignmentService.getVolunteerLabels(volunteerId));
     }
 
+    @GetMapping("/opportunity/{opportunityId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANISATION')")
+    public ResponseEntity<List<AssignedLabelDTO>> getOpportunityLabels(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID opportunityId) {
+        assertCanManageOpportunityLabels(userDetails, opportunityId);
+        return ResponseEntity.ok(labelAssignmentService.getOpportunityLabels(opportunityId));
+    }
+
+    @PutMapping("/opportunity/{opportunityId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANISATION')")
+    public ResponseEntity<List<AssignedLabelDTO>> setOpportunityLabels(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID opportunityId,
+            @Valid @RequestBody List<AssignedLabelDTO> labels) {
+        assertCanManageOpportunityLabels(userDetails, opportunityId);
+        labelAssignmentService.setOpportunityLabels(labels, opportunityId);
+        return ResponseEntity.ok(labelAssignmentService.getOpportunityLabels(opportunityId));
+    }
+
     private UUID getCurrentVolunteerProfileId(CustomUserDetails userDetails) {
         VProfileResponseDTO profile = volunteerProfileService.getVolunteerProfileByUserId(userDetails.getId());
         return profile.getId();
+    }
+
+    private void assertCanManageOpportunityLabels(CustomUserDetails userDetails, UUID opportunityId) {
+        if (userDetails.getRole() == Role.ADMIN) {
+            opportunityService.getOpportunityById(opportunityId);
+            return;
+        }
+
+        OProfileResponseDTO profile = organisationProfileService.getOrganisationProfileByUserId(userDetails.getId());
+        opportunityService.getOpportunityByIdForOrganisation(opportunityId, profile.getId());
     }
 }

@@ -8,11 +8,14 @@ import {
   createVolunteerHistory,
   deleteOrganisationProfilePicture,
   deleteOpportunity,
+  getLabels,
   getOpportunity,
   getOpportunityHistory,
+  getOpportunityLabels,
   getOrganisationApplications,
   getOrganisationOpportunities,
   getOrganisationProfile,
+  setOpportunityLabels,
   updateApplicationStatus,
   updateOpportunity,
   updateOrganisationProfile,
@@ -22,9 +25,11 @@ import {
 } from '../api/organisation'
 import type {
   AccountType,
+  AssignedLabelDTO,
   ApplicationResponseDTO,
   ApplicationStatus,
   CreateOpportunityDTO,
+  LabelDTO,
   OProfileResponseDTO,
   OpportunityResponseDTO,
   OpportunityStatus,
@@ -32,6 +37,11 @@ import type {
   VolunteerHistoryResponseDTO,
 } from '../api/types'
 import { useNotifications } from '../notifications/NotificationContext'
+import {
+  availabilityOptions,
+  hasAvailability,
+  toggleAvailability,
+} from '../utils/availability'
 import '../styles/organisation.css'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error'
@@ -672,6 +682,8 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
   const [state, setState] = useState<LoadState>(mode === 'edit' ? 'loading' : 'ready')
   const [error, setError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [labels, setLabels] = useState<LabelDTO[]>([])
+  const [assignedLabels, setAssignedLabels] = useState<AssignedLabelDTO[]>([])
   const [form, setForm] = useState<CreateOpportunityDTO>({
     title: '',
     description: '',
@@ -688,6 +700,15 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
   })
 
   useEffect(() => {
+    if (!token) {
+      return
+    }
+    getLabels(token)
+      .then(setLabels)
+      .catch((caughtError) => setError(getErrorMessage(caughtError)))
+  }, [token])
+
+  useEffect(() => {
     if (!token || mode !== 'edit' || !opportunityId) {
       return
     }
@@ -697,7 +718,10 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     async function loadOpportunity() {
       try {
         setState('loading')
-        const opportunity = await getOpportunity(accessToken, currentOpportunityId)
+        const [opportunity, nextLabels] = await Promise.all([
+          getOpportunity(accessToken, currentOpportunityId),
+          getOpportunityLabels(accessToken, currentOpportunityId),
+        ])
         setForm({
           title: opportunity.title,
           description: opportunity.description,
@@ -714,6 +738,7 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
           capacity: opportunity.capacity ?? null,
           status: opportunity.status,
         })
+        setAssignedLabels(nextLabels)
         setState('ready')
       } catch (caughtError) {
         setError(getErrorMessage(caughtError))
@@ -729,6 +754,23 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     value: CreateOpportunityDTO[K],
   ) {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function toggleOpportunityLabel(label: LabelDTO) {
+    setAssignedLabels((current) => {
+      if (current.some((assignedLabel) => assignedLabel.labelId === label.id)) {
+        return current.filter((assignedLabel) => assignedLabel.labelId !== label.id)
+      }
+      return [...current, { labelId: label.id, weight: label.required ? 1 : 0.8 }]
+    })
+  }
+
+  function updateOpportunityLabelWeight(labelId: number, weight: number) {
+    setAssignedLabels((current) =>
+      current.map((assignedLabel) =>
+        assignedLabel.labelId === labelId ? { ...assignedLabel, weight } : assignedLabel,
+      ),
+    )
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -756,11 +798,13 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
     try {
       setIsSaving(true)
       setError('')
+      let savedOpportunity: OpportunityResponseDTO
       if (mode === 'edit' && opportunityId) {
-        await updateOpportunity(token, opportunityId, payload)
+        savedOpportunity = await updateOpportunity(token, opportunityId, payload)
       } else {
-        await createOpportunity(token, payload)
+        savedOpportunity = await createOpportunity(token, payload)
       }
+      await setOpportunityLabels(token, savedOpportunity.id, assignedLabels)
       navigate('/organisation/opportunities')
     } catch (caughtError) {
       setError(getErrorMessage(caughtError))
@@ -877,16 +921,69 @@ export function OrganisationOpportunityFormPage({ mode }: { mode: 'create' | 'ed
                 }
               />
             </label>
-            <label>
-              Availability
-              <input
-                name="availability"
-                value={form.availability ?? ''}
-                onChange={(event) => updateField('availability', event.target.value)}
-                placeholder="Weekday mornings, weekends"
-              />
-            </label>
           </div>
+          <fieldset className="availability-fieldset">
+            <legend>Availability</legend>
+            <div className="availability-options">
+              {availabilityOptions.map((option) => (
+                <label className="volunteer-toggle" key={option.value}>
+                  <input
+                    checked={hasAvailability(form.availability ?? '', option.value)}
+                    type="checkbox"
+                    onChange={(event) =>
+                      updateField(
+                        'availability',
+                        toggleAvailability(
+                          form.availability ?? '',
+                          option.value,
+                          event.target.checked,
+                        ),
+                      )
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+            <input name="availability" type="hidden" value={form.availability ?? ''} />
+          </fieldset>
+          <fieldset className="availability-fieldset">
+            <legend>Matching labels</legend>
+            <p className="org-small-note">
+              Select the skills, causes, and interests that should drive volunteer matching.
+            </p>
+            <div className="opportunity-label-grid">
+              {labels.map((label) => {
+                const assignedLabel = assignedLabels.find((item) => item.labelId === label.id)
+                return (
+                  <div className="opportunity-label-row" key={label.id}>
+                    <label className="volunteer-toggle">
+                      <input
+                        checked={Boolean(assignedLabel)}
+                        type="checkbox"
+                        onChange={() => toggleOpportunityLabel(label)}
+                      />
+                      {label.name}
+                    </label>
+                    <span>{label.type.toLowerCase()}</span>
+                    {assignedLabel ? (
+                      <input
+                        aria-label={`${label.name} match weight`}
+                        max="1"
+                        min="0.1"
+                        step="0.1"
+                        type="number"
+                        value={assignedLabel.weight}
+                        onChange={(event) =>
+                          updateOpportunityLabelWeight(label.id, Number(event.target.value))
+                        }
+                      />
+                    ) : null}
+                  </div>
+                )
+              })}
+            </div>
+          </fieldset>
           <div className="org-checks">
             <label>
               <input

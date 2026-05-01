@@ -8,6 +8,11 @@ import {
   updateVolunteerProfile,
 } from '../../api/volunteer'
 import type { AssignedLabelDTO, LabelDTO, VolunteerProfileDTO } from '../../api/types'
+import {
+  availabilityOptions,
+  hasAvailability,
+  toggleAvailability,
+} from '../../utils/availability'
 import { calculateVolunteerProfileCompletion } from '../../utils/volunteerProfile'
 import { VolunteerNotice } from './VolunteerNotice'
 
@@ -186,14 +191,26 @@ export function VolunteerOnboardingPage() {
               rows={6}
             />
           </label>
-          <label>
-            Availability
-            <input
-              value={form.availability}
-              onChange={(event) => updateField('availability', event.target.value)}
-              placeholder="Weekends, evenings, one-off events..."
-            />
-          </label>
+          <fieldset className="availability-fieldset">
+            <legend>Availability</legend>
+            <div className="availability-options">
+              {availabilityOptions.map((option) => (
+                <label className="volunteer-toggle" key={option.value}>
+                  <input
+                    checked={hasAvailability(form.availability, option.value)}
+                    type="checkbox"
+                    onChange={(event) =>
+                      updateField(
+                        'availability',
+                        toggleAvailability(form.availability, option.value, event.target.checked),
+                      )
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </section>
 
         <section className="admin-panel admin-form">
