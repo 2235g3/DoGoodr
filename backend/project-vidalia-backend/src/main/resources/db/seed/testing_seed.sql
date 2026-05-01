@@ -45,10 +45,12 @@ INSERT INTO organisation_profiles (
     verified
 )
 VALUES
-    ('00000000-0000-4000-8000-000000000201', '00000000-0000-4000-8000-000000000101', 'Surrey Community Kitchen', NULL, 'CHARITY', 'Community meals, pantry support, and practical help for residents facing food insecurity.', 'kitchen@dogoodr.test', 'Guildford, Surrey', 'https://example.org/community-kitchen', NOW(), true),
-    ('00000000-0000-4000-8000-000000000202', '00000000-0000-4000-8000-000000000102', 'Green Streets Guildford', NULL, 'COMMUNITY_GROUP', 'Local environmental projects focused on cleaner streets, biodiversity, and low-carbon neighbourhoods.', 'greenstreets@dogoodr.test', 'Guildford, Surrey', 'https://example.org/green-streets', NOW(), true),
-    ('00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-000000000103', 'Bright Futures Learning', NULL, 'CHARITY', 'Tutoring, digital inclusion, and mentoring programmes for young people and adult learners.', 'learning@dogoodr.test', 'Woking, Surrey', 'https://example.org/bright-futures', NOW(), true),
-    ('00000000-0000-4000-8000-000000000204', '00000000-0000-4000-8000-000000000104', 'Wellbeing Connect Surrey', NULL, 'NGO', 'Social connection, mental wellbeing, and befriending support for isolated residents.', 'wellbeing@dogoodr.test', 'Surrey', 'https://example.org/wellbeing-connect', NOW(), true)
+    -- account_type is stored as the AccountType enum ordinal in the current production schema:
+    -- PERSONAL=0, CHARITY=1, NGO=2, GOVERNMENT=3, COMMUNITY_GROUP=4, OTHER=5.
+    ('00000000-0000-4000-8000-000000000201', '00000000-0000-4000-8000-000000000101', 'Surrey Community Kitchen', NULL, 1, 'Community meals, pantry support, and practical help for residents facing food insecurity.', 'kitchen@dogoodr.test', 'Guildford, Surrey', 'https://example.org/community-kitchen', NOW(), true),
+    ('00000000-0000-4000-8000-000000000202', '00000000-0000-4000-8000-000000000102', 'Green Streets Guildford', NULL, 4, 'Local environmental projects focused on cleaner streets, biodiversity, and low-carbon neighbourhoods.', 'greenstreets@dogoodr.test', 'Guildford, Surrey', 'https://example.org/green-streets', NOW(), true),
+    ('00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-000000000103', 'Bright Futures Learning', NULL, 1, 'Tutoring, digital inclusion, and mentoring programmes for young people and adult learners.', 'learning@dogoodr.test', 'Woking, Surrey', 'https://example.org/bright-futures', NOW(), true),
+    ('00000000-0000-4000-8000-000000000204', '00000000-0000-4000-8000-000000000104', 'Wellbeing Connect Surrey', NULL, 2, 'Social connection, mental wellbeing, and befriending support for isolated residents.', 'wellbeing@dogoodr.test', 'Surrey', 'https://example.org/wellbeing-connect', NOW(), true)
 ON CONFLICT (user_id) DO UPDATE
 SET display_name = EXCLUDED.display_name,
     account_type = EXCLUDED.account_type,
